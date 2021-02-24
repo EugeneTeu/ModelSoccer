@@ -1,0 +1,83 @@
+﻿// +-----+-----+-----+-----+
+// |  1  |  2  |  3  |  4  |
+// +-----+-----+-----+-----+
+// 1 is team 1 goal
+// 4 is team 2 goal
+
+var time = 20;
+enum {team_1, team_2, na};
+
+var ball = 0; // out of bounds
+var team_1_score = 0;
+var team_2_score = 0;
+
+WhoStartFirst = []i:{2, 3} @ TossCoin { ball = i } -> Skip;
+
+Reset = [ball == 1] { ball = 2; } -> Team1
+	 [] [ball == 4] { ball = 3; } -> Team2;
+
+ShootTeam1 = pcase {
+	1: Score1 {
+		time--;
+		ball = 4;
+		team_1_score++;
+	} -> Reset
+	1: OwnGoal1 {
+		time--;
+		ball = 1;
+		team_2_score++;
+	} -> Reset
+	1: MissKeepPossession1 {
+		time--;
+		ball = 2;
+	} -> Team1
+	1: MissChangePossession1 {
+		time--;
+		ball = 3;
+	} -> Team2
+};
+
+ShootTeam2 = pcase {
+	1: Score2 {
+		time--;
+		ball = 1;
+		team_2_score++;
+	} -> Reset
+	1: OwnGoal2 {
+		time--;
+		ball = 4;
+		team_1_score++;
+	} -> Reset
+	1: MissKeepPossession2 {
+		time--;
+		ball = 3;
+	} -> Team2
+	1: MissChangePossession2 {
+		time--;
+		ball = 2;
+	} -> Team1
+};
+
+Team1 = [ball == 2 && time > 0] ShootTeam1
+	  [] [time <= 0] Skip
+	  [] [ball == 3 && time > 0] Team2;
+Team2 = [ball == 3 && time > 0] ShootTeam2
+	  [] [time <= 0] Skip
+	  [] [ball == 2 && time > 0] Team1;
+
+PlayGame = WhoStartFirst; (Team1 [] Team2);
+//PlayGame = Team1 [] Team2;
+
+#define Team1Win team_1_score > team_2_score && time == 0;
+#define Team2Win team_2_score > team_1_score && time == 0;
+#define Draw team_1_score == team_2_score && time == 0;
+
+#assert PlayGame reaches Team1Win;
+#assert PlayGame reaches Team2Win;
+#assert PlayGame reaches Draw;
+
+#assert PlayGame reaches Team1Win with prob;
+#assert PlayGame reaches Team2Win with prob;
+#assert PlayGame reaches Draw with prob;
+
+#assert PlayGame deadlockfree;
