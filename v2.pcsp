@@ -9,100 +9,93 @@
 // 11 is team 2 goal
 // 0 is out of bounds
 
-hvar time = 6;
 enum {na, team_1, team_2};
 
-hvar ball = 6;
+hvar time = 6;
+var ball = 6;
 var team_1_score = 0;
 var team_2_score = 0;
-
 var pos1 = 6;
 var pos2 = 6;
-
 var possession = na;
 
 WhoStartFirst = []i:{team_1, team_2} @ TossCoin { possession = i; } -> Skip;
 
-Move1 =  [pos1 != 2 && pos1 != 5 && pos1 != 8] moveLeft1 { if (possession == team_1) {ball = ball - 1;} ; pos1 = pos1 - 1; }  -> Team1
-	[] [pos1 != 2 && pos1 != 3 && pos1 != 4] moveUp1 { if (possession == team_1) {ball = ball - 3;} ; pos1 = pos1 - 3; } -> Team1
-	[] [pos1 != 4 && pos1 != 7 && pos1 != 10] moveRight1 { if (possession == team_1) {ball = ball + 1;} ; pos1 = pos1 + 1; } -> Team1
-	[] [pos1 != 8 && pos1 != 9 && pos1 != 10] moveDown1 { if (possession == team_1) {ball = ball + 3;} ; pos1 = pos1 + 3; } -> Team1;
+Move1 =  [pos1 != 2 && pos1 != 5 && pos1 != 8] MoveLeft.1 { if (possession == team_1) {ball = ball - 1;} ; pos1 = pos1 - 1; }  -> TakeAction
+	[] [pos1 != 2 && pos1 != 3 && pos1 != 4] MoveUp.1 { if (possession == team_1) {ball = ball - 3;} ; pos1 = pos1 - 3; } -> TakeAction
+	[] [pos1 != 4 && pos1 != 7 && pos1 != 10] MoveRight.1 { if (possession == team_1) {ball = ball + 1;} ; pos1 = pos1 + 1; } -> TakeAction
+	[] [pos1 != 8 && pos1 != 9 && pos1 != 10] MoveDown.1 { if (possession == team_1) {ball = ball + 3;} ; pos1 = pos1 + 3; } -> TakeAction;
 
-Team1 = 
-    [possession == team_1 && time > 0] a -> Tick { time--; } -> pcase {
-			1: Move1
-			1: ShootTeam1
-		}
-	[] [possession == team_2 && time > 0] a -> Tick { time--; } -> Move1
-	[] [time <= 0] Skip ;
-	  
-//Resset = [ball == 1] { ball = 6; pos1 = 6; pos2 = 6; possession = team_1; } -> Team1
-//	 [] [ball == 11] { ball = 6; pos1 = 6; pos2 = 6; possession = team_2; } -> Team2
-//	 [] [ball == 0 && possession == team_1] {ball = 7; pos2=7; possession = team_2;} -> Team2
-//	 [] [ball == 0 && possession == team_2] {ball = 5; pos1=5; possession = team_1;} -> Team1;
+Team1 = Move1
+	[] [possession == team_1] ShootTeam1;
 
 ShootTeam1 = pcase {
-	1: Score1 {
-		ball = 11;
+	1: Score.1 {
+		ball = 6;
+		pos1 = 6;
+		pos2 = 6;
+		possession = team_2;
 		team_1_score++;
-	} -> ResetScore1 {ball = 6; pos1 = 6; pos2 = 6; possession = team_2; } -> Team2
-	1: OwnGoal1 {
-		ball = 1;
+	} -> TakeAction
+	1: OwnGoal.1 {
+		ball = 6;
+		pos1 = 6;
+		pos2 = 6;
+		possession = team_1;
 		team_2_score++;
-	} -> ResetOwnGoal1 {ball = 6; pos1 = 6; pos2 = 6; possession = team_1; } -> Team1
-	1: MissKeepPossession1 {
-		// shoot, then go back to where I am
-		ball = ball;
-	} -> Team1
-	1: MissChangePossession1 {
+	} -> TakeAction
+	1: MissKeepPossession.1 -> TakeAction
+	1: MissChangePossession.1 {
 		// shoot, ball go to where pos 2 is
 		ball = pos2;
 		possession = team_2;
-	} -> Team2
-	1: OutOfBounds1 {
-		ball = 0;
-	} -> ResetOut1 {ball = 7; pos2 = 7; possession = team_2;} -> Team2
+	} -> TakeAction
+	1: OutOfBounds.1 {
+		ball = 7;
+		pos2 = 7;
+		possession = team_2;
+	} -> TakeAction
 };
 
-Move2 = [pos2 != 2 && pos2 != 5 && pos2 != 8] moveLeft2 { if (possession == team_2) {ball = ball - 1;} ; pos2 = pos2 - 1; }  -> a -> Team2
-	[] [pos2 != 2 && pos2 != 3 && pos2 != 4] moveUp2 { if (possession == team_2) {ball = ball - 3;} ; pos2 = pos2 - 3; } -> a -> Team2
-	[] [pos2 != 4 && pos2 != 7 && pos2 != 10] moveRight2 { if (possession == team_2) {ball = ball + 1;} ; pos2 = pos2 + 1; } -> a -> Team2
-	[] [pos2 != 8 && pos2 != 9 && pos2 != 10] moveDown2 { if (possession == team_2) {ball = ball + 3;} ; pos2 = pos2 + 3; } -> a -> Team2;
+Move2 = [pos2 != 2 && pos2 != 5 && pos2 != 8] MoveLeft.2 { if (possession == team_2) {ball = ball - 1;} ; pos2 = pos2 - 1; }  -> TakeAction
+	[] [pos2 != 2 && pos2 != 3 && pos2 != 4] MoveUp.2 { if (possession == team_2) {ball = ball - 3;} ; pos2 = pos2 - 3; } -> TakeAction
+	[] [pos2 != 4 && pos2 != 7 && pos2 != 10] MoveRight.2 { if (possession == team_2) {ball = ball + 1;} ; pos2 = pos2 + 1; } -> TakeAction
+	[] [pos2 != 8 && pos2 != 9 && pos2 != 10] MoveDown.2 { if (possession == team_2) {ball = ball + 3;} ; pos2 = pos2 + 3; } -> TakeAction;
 
-Team2 =
-    [possession == team_2 && time > 0] Tick { time--; } -> pcase {
-			1: Move2
-			1: ShootTeam2
-		}
-	[] [possession == team_1 && time > 0] Tick { time--; } -> Move2 
-	[] [time <= 0] Skip;
-	  
+Team2 = Move2
+	[] [possession == team_2] ShootTeam2;
+
 ShootTeam2 = pcase {
-	1: Score2 {
-		ball = 1;
+	1: Score.2 {
+		ball = 6;
+		pos1 = 6;
+		pos2 = 6;
+		possession = team_1;
 		team_1_score++;
-	} -> ResetScore2 {ball = 6; pos1 = 6; pos2 = 6; possession = team_1; } -> a -> Team1
-	1: OwnGoal2 {
-		ball = 11;
+	} -> TakeAction
+	1: OwnGoal.2 {
+		ball = 6;
+		pos1 = 6;
+		pos2 = 6;
+		possession = team_2;
 		team_2_score++;
-	} -> ResetOwnGoal2 {ball = 6; pos1 = 6; pos2 = 6; possession = team_2; } -> a -> Team2
-	1: MissKeepPossession2 {
-		// shoot, then go back to where I am
-		ball = ball;
-	} -> a -> Team2
-	1: MissChangePossession2 {
+	} -> TakeAction
+	1: MissKeepPossession.2 -> TakeAction
+	1: MissChangePossession.2 {
 		// shoot, ball go to where pos 1 is
 		ball = pos1;
 		possession = team_1;
-	} -> a -> Team1
-	1: OutOfBounds2 {
-		ball = 0;
-	} -> ResetOut2 {ball = 5; pos1=5; possession = team_1;} -> a -> Team1
+	} -> TakeAction
+	1: OutOfBounds.2 {
+		ball = 5;
+		pos1 = 5;
+		possession = team_1;
+	} -> TakeAction
 };
 
-//Progress = (Team1 ||| Team2) -> (Tick { time--; }) -> Progress;
-//PlayGame = WhoStartFirst; Progress;
-PlayGame = WhoStartFirst; (Team1 ||| Team2);
+PlayGame = WhoStartFirst; TakeAction; 
+TakeAction = [time > 0] Tick { time--; } -> (Team1 [] Team2)
+		[] [time <= 0] Skip;
 
 #define Team1Win team_1_score > team_2_score && time <= 0;
 #define Team2Win team_2_score > team_1_score && time <= 0;
