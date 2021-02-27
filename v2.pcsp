@@ -11,21 +11,21 @@
 
 hvar time = 6;
 var ball = 6;
-var possession = 0;
+var possession = 0; // initially, undecided possession
 var scores = [0, 0, 0]; // first element is dummy
 var positions = [0, 6, 6]; // first element is dummy
 hvar action_probabilities[3][5] = [
 	20, 20, 20, 20, 20, // dummy element
 	10, 1, 9, 50, 30, // [Score, OwnGoal, MissKeepPossession, MissChangePossession, OutOfBounds]
-	20, 1, 4, 50, 25
+	20, 1, 4, 50, 25 // each row must add up to 100
 ];
 
 DecideFirstPossession = []i:{1, 2} @ TossCoin { possession = i; } -> Skip;
 
 Move(i) =
-	[positions[i] != 2 && positions[i] != 5 && positions[i] != 8] MoveLeft.i { 
-		if (possession == i) { 
-			ball = ball - 1; 
+	[positions[i] != 2 && positions[i] != 5 && positions[i] != 8] MoveLeft.i {
+		if (possession == i) {
+			ball = ball - 1;
 		};
 		positions[i] = positions[i] - 1;
 	} -> TakeAction
@@ -54,7 +54,7 @@ Shoot(i) = pcase {
 		ball = 6;
 		positions[1] = 6;
 		positions[2] = 6;
-		possession = 2;
+		possession = (possession * 2) % 3;
 		scores[i]++;
 	} -> TakeAction
 	action_probabilities[i][1]: OwnGoal.i {
@@ -81,8 +81,7 @@ Shoot(i) = pcase {
 	} -> TakeAction
 };
 
-TakeTeamAction(i) = Move(i)
-	[] [possession == i] Shoot(i);
+TakeTeamAction(i) = Move(i) [] [possession == i] Shoot(i);
 
 PlayGame = DecideFirstPossession; TakeAction;
 TakeAction = [time > 0] Tick { time--; } -> (TakeTeamAction(1) [] TakeTeamAction(2))
