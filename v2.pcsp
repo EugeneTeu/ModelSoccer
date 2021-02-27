@@ -9,7 +9,7 @@
 // 11 is team 2 goal
 // 0 is out of bounds
 
-hvar time = 6;
+var time = 6;
 var ball = 6;
 var possession = 0; // initially, undecided possession
 var scores = [0, 0, 0]; // first element is dummy
