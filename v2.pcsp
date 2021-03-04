@@ -82,9 +82,13 @@ Shoot(i) = pcase {
 
 TakeTeamAction(i) = Move(i) [] [possession == i] Shoot(i);
 
+TakeAction = [time > 0] Tick { time--; } -> pcase {
+		[0.5]: TakeTeamAction(0)
+		[0.5]: TakeTeamAction(1)
+	} 
+	[] [time <= 0] Skip;
+
 PlayGame = DecideFirstPossession; TakeAction;
-TakeAction = [time > 0] Tick { time--; } -> (TakeTeamAction(0) [] TakeTeamAction(1))
-		[] [time <= 0] Skip;
 
 #define FirstTeamWin scores[0] > scores[1] && time <= 0;
 #define SecondTeamWin scores[1] > scores[0] && time <= 0;
