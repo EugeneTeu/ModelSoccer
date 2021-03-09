@@ -1,0 +1,119 @@
+﻿// +-----+-----+-----+-----+-----+
+// |     |  2  |  3  |  4  |     |
+// +-----+-----+-----+-----+-----+
+// |  1  |  5  |  6  |  7  |  11 |
+// +-----+-----+-----+-----+-----+
+// |     |  8  |  9  |  10 |     |
+// +-----+-----+-----+-----+-----+
+// 1 is team 1 goal
+// 11 is team 2 goal
+// 0 is out of bounds
+
+#define PlayersPerTeam 2;
+
+hvar time = 10;
+hvar ball = 6;
+hvar possession = -1; // initially, undecided possession
+var scores = [0, 0];
+
+hvar positions[2][2] = [
+	6, 5,
+	6, 7
+];
+hvar action_probabilities[2][5] = [
+	10, 1, 9, 50, 30, // [Score, OwnGoal, MissKeepPossession, MissChangePossession, OutOfBounds]
+	20, 1, 4, 50, 25 // each row must add up to 100
+];
+//hvar TeamFormation[2][PlayersPerTeam] = []
+hvar movement_type = 0;
+
+DecideFirstPossession = []i:{0, 1} @ GivePossession.i { possession = i; } -> Skip;
+
+TakeAction = [time > 0] Tick { time--; } -> ((TakeTeamAction(0); TakeTeamAction(1)) [] (TakeTeamAction(1); TakeTeamAction(0))); TakeAction
+	[] [time <= 0] Skip;
+
+TakeTeamAction(i) = ([possession == 0] Movement.i {movement_type = 1} -> Skip [] [possession == 1] Movement.i {movement_type = -1} -> Skip); Move(i); 
+	[possession != i] DefensiveActions(i) [] [possession == i] OffensiveActions(i);
+
+DefensiveActions(i) = Steal(i);
+
+OffensiveActions(i) = Shoot(i);
+
+ValidateMovement(team, player, action) = 
+	ifb ((positions[team][player] + action < 10) && (positions[team][player] + action > 2)) {
+		if ((action == 3) || (action == -3)) {
+			move.team.player {positions[team][player] = positions[team][player] + action;} -> Skip
+		}
+		else {
+			if (action == 1) {
+				ifb ((positions[team][player] != 4) && (positions[team][player] != 7) && (positions[team][player] != 10)) {
+					move.team.player {positions[team][player] = positions[team][player] + action;} -> Skip
+				}
+			}
+			else {
+				ifb ((positions[team][player] != 2) && (positions[team][player] != 5) && (positions[team][player] != 8)) {
+					move.team.player {positions[team][player] = positions[team][player] + action;} -> Skip
+				}
+			}
+		}
+	};
+
+Move(i) = || j:{0..PlayersPerTeam - 1} @ pcase {
+			1: ValidateMovement(i, j, -1 * movement_type)
+			3: ValidateMovement(i, j, -3)
+			3: ValidateMovement(i, j, 3)
+			4: ValidateMovement(i, j, movement_type)
+	};
+
+Shoot(i) = Skip;
+Steal(i) = Skip;
+
+//
+//Shoot(i) = pcase {
+//	action_probabilities[i][0]: Score.i {
+//		ball = 6;
+//		positions[0] = 6;
+//		positions[1] = 6;
+//		possession = (possession + 1) % 2;
+//		scores[i]++;
+//	} -> Skip
+//	action_probabilities[i][1]: OwnGoal.i {
+//		ball = 6;
+//		positions[0] = 6;
+//		positions[1] = 6;
+//		possession = (possession + 1) % 2;
+//		scores[(i + 1) % 2]++;
+//	} -> Skip
+//	action_probabilities[i][2]: MissKeepPossession.i -> Skip
+//	action_probabilities[i][3]: MissChangePossession.i {
+//		ball = positions[(i + 1) % 2]; // Set ball to where opposing player is
+//		possession = (possession + 1) % 2; // Change possession
+//	} -> Skip
+//	action_probabilities[i][4]: OutOfBounds.i {
+//		if (i == 0) {
+//			ball = 7;
+//			positions[1] = 7;
+//		} else {
+//			ball = 5;
+//			positions[0] = 5;
+//		};
+//		possession = (possession + 1) % 2;
+//	} -> Skip
+//};
+//
+
+PlayGame = DecideFirstPossession; TakeAction;
+
+#define FirstTeamWin scores[0] > scores[1] && time <= 0;
+#define SecondTeamWin scores[1] > scores[0] && time <= 0;
+#define Draw scores[0] == scores[1] && time <= 0;
+
+#assert PlayGame reaches FirstTeamWin;
+#assert PlayGame reaches SecondTeamWin;
+#assert PlayGame reaches Draw;
+
+#assert PlayGame reaches FirstTeamWin with prob;
+#assert PlayGame reaches SecondTeamWin with prob;
+#assert PlayGame reaches Draw with prob;
+
+#assert PlayGame deadlockfree;
