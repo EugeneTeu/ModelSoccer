@@ -15,16 +15,41 @@ enum {
 	DEFENSIVE
 };
 
-var time = 2;
+var time = 3;
 hvar ball[2] = [0, 0];
 hvar possession = -1; // initially, undecided possession
 var scores = [0, 0];
 hvar positions[2][2][2] = [0, 0, 0, 0, 0, 0, 0, 0];
-hvar action_probabilities[2][5] = [
+hvar shoot_probabilities[2][5] = [
 	10, 1, 9, 50, 30, // [Score, OwnGoal, MissKeepPossession, MissChangePossession, OutOfBounds]
 	20, 1, 4, 50, 25 // each row must add up to 100
 ];
 hvar strategies = [NEUTRAL, NEUTRAL];
+hvar paused = false;
+
+_ResetBall = ResetBall {
+	ball[0] = 1;
+	ball[1] = 1;
+} -> Skip;
+
+_ResetTeamPositions(i) = ResetTeamPositions.i {
+	if (i == 0) {
+		positions[0][0][0] = 0;
+		positions[0][0][1] = 0;
+		positions[0][1][0] = 2;
+		positions[0][1][1] = 0;
+	} else if (i == 1) {
+		positions[1][0][0] = 0;
+		positions[1][0][1] = 2;
+		positions[1][1][0] = 2;
+		positions[1][1][1] = 2;
+	}
+} -> Skip;
+
+_ResetStrategies = ResetStrategies {
+	strategies[0] = OFFENSIVE;
+	strategies[1] = OFFENSIVE;
+} -> Skip;
 
 _DribbleLeft(i, j) = DribbleLeft.i.j {
 	ball[1]--;
@@ -62,73 +87,67 @@ _MoveDown(i, j) = MoveDown.i.j {
 	positions[i][j][0]++;
 } -> Skip;
 
-MoveTowardsBall(i, j) = if (positions[i][j][0] == ball[0] && positions[i][j][1] == ball[1]) {
-	// Same position as ball, no need to move
-	Skip
-} else if (positions[i][j][0] > ball[0] && positions[i][j][1] == ball[1]) {
-	// Above the ball
-	_MoveUp(i, j)
-} else if (positions[i][j][0] < ball[0] && positions[i][j][1] == ball[1]) {
-	// Below the ball
-	_MoveDown(i, j)
-} else if (positions[i][j][0] == ball[0] && positions[i][j][1] < ball[1]) {
-	// Left of ball
-	_MoveRight(i, j)
-} else if (positions[i][j][0] == ball[0] && positions[i][j][1] > ball[1]) {
-	// Right of ball
-	_MoveLeft(i, j)
-} else if (positions[i][j][0] > ball[0] && positions[i][j][1] > ball[1]) {
-	// Bottom right of ball
-	atomic {
-		_MoveLeft(i, j);
-		_MoveUp(i, j)
-	}
-} else if (positions[i][j][0] > ball[0] && positions[i][j][1] < ball[1]) {
-	// Bottom left of ball
-	atomic {
-		_MoveRight(i, j);
-		_MoveUp(i, j)
-	}
-} else if (positions[i][j][0] < ball[0] && positions[i][j][1] < ball[1]) {
-	// Top left of ball
-	atomic {
-		_MoveRight(i, j);
-		_MoveDown(i, j)
-	}
-} else if (positions[i][j][0] < ball[0] && positions[i][j][1] > ball[1]) {
-	// Top right of ball
-	atomic {
-		_MoveLeft(i, j);
-		_MoveDown(i, j)
-	}
-};
+_MoveUpLeft(i, j) = MoveUpLeft.i.j {
+	positions[i][j][0]--;
+	positions[i][j][1]--;
+} -> Skip;
 
-Move(i, j) = 
-	[strategies[i] == NEUTRAL] _MoveRight(i, j)
+_MoveUpRight(i, j) = MoveUpRight.i.j {
+	positions[i][j][0]--;
+	positions[i][j][1]++;
+} -> Skip;
+
+_MoveDownLeft(i, j) = MoveDownLeft.i.j {
+	positions[i][j][0]++;
+	positions[i][j][1]--;
+} -> Skip;
+
+_MoveDownRight(i, j) = MoveDownRight.i.j {
+	positions[i][j][0]++;
+	positions[i][j][1]++;
+} -> Skip;
+
+MoveTowardsBall(i, j) =
+	[positions[i][j][0] == ball[0] && positions[i][j][1] == ball[1]] Skip
 	[]
-	[strategies[i] == OFFENSIVE] _MoveLeft(i, j)
+	[positions[i][j][0] > ball[0] && positions[i][j][1] == ball[1]] _MoveUp(i, j)
 	[]
-	[strategies[i] == DEFENSIVE] _MoveUp(i, j)
+	[positions[i][j][0] < ball[0] && positions[i][j][1] == ball[1]] _MoveDown(i, j)
+	[]
+	[positions[i][j][0] == ball[0] && positions[i][j][1] < ball[1]] _MoveRight(i, j)
+	[]
+	[positions[i][j][0] == ball[0] && positions[i][j][1] > ball[1]] _MoveLeft(i, j)
+	[]
+	[positions[i][j][0] > ball[0] && positions[i][j][1] > ball[1]] _MoveUpLeft(i, j)
+	[]
+	[positions[i][j][0] > ball[0] && positions[i][j][1] < ball[1]] _MoveUpRight(i, j)
+	[]
+	[positions[i][j][0] < ball[0] && positions[i][j][1] < ball[1]] _MoveDownRight(i, j)
+	[]
+	[positions[i][j][0] < ball[0] && positions[i][j][1] > ball[1]] _MoveDownLeft(i, j)
 ;
 
-_ResetBall = ResetBall {
-	ball[0] = 1;
-	ball[1] = 1;
+MoveTowardsOpponentGoal(i, j) =
+	[i == 0 && positions[i][j][1] != 2] _MoveRight(i, j)
+	[]
+	[i == 1 && positions[i][j][1] != 0] _MoveLeft(i, j)
+;
+
+Move(i, j) = 
+	[!paused && strategies[i] == NEUTRAL] MoveTowardsBall(i, j)
+	[]
+	[!paused && strategies[i] == OFFENSIVE] MoveTowardsOpponentGoal(i, j)
+	[]
+	[!paused && strategies[i] == DEFENSIVE] MoveTowardsBall(i, j)
+	[]
+	[paused] Skip
+;
+
+_Pause = Pause {
+	paused = true;
 } -> Skip;
 
-_ResetTeamPositions(i) = ResetTeamPositions.i {
-	if (i == 0) {
-		positions[0][0][0] = 0;
-		positions[0][0][1] = 0;
-		positions[0][1][0] = 2;
-		positions[0][1][1] = 0;
-	} else if (i == 1) {
-		positions[1][0][0] = 0;
-		positions[1][0][1] = 2;
-		positions[1][1][0] = 2;
-		positions[1][1][1] = 2;
-	}
-} -> Skip;
+_Reset = atomic { _ResetPositions; _ResetStrategies };
 
 _ResetPositions = atomic {
 	_ResetBall; _ResetTeamPositions(0); _ResetTeamPositions(1)
@@ -142,33 +161,36 @@ TakePossession(i) = []j:{0, 1} @ [positions[i][j][0] == ball[0] && positions[i][
 	possession = i
 } -> Skip;
 
-Shoot(i) = if (possession == i) {
-	atomic {
-		pcase {
-			action_probabilities[i][0]: Score.i {
-				scores[i]++;
-			} -> (_ResetPositions; _ChangePossession)
+Shoot(i) = 
+	[!paused && possession == i] pcase {
+		shoot_probabilities[i][0]: atomic { Score.i {
+			scores[i]++;
+		} -> _ResetPositions; _ChangePossession }
+	
+		shoot_probabilities[i][1]: atomic { OwnGoal.i {
+			scores[(i + 1) % 2]++;
+		} -> _ResetPositions; _ChangePossession }
+	
+		shoot_probabilities[i][2]: atomic { MissKeepPossession.i -> Skip }
 		
-			action_probabilities[i][1]: OwnGoal.i {
-				scores[(i + 1) % 2]++;
-			} -> (_ResetPositions; _ChangePossession)
-			
-			action_probabilities[i][2]: MissKeepPossession.i -> Skip
-			
-			action_probabilities[i][3]: MissChangePossession.i -> (_ResetBall; _ChangePossession)
-			
-			action_probabilities[i][4]: OutOfBounds.i -> (_ResetPositions; _ChangePossession)
-		}
+		shoot_probabilities[i][3]: atomic { MissChangePossession.i ->  _ResetBall; _ChangePossession }
+		
+		shoot_probabilities[i][4]: atomic { OutOfBounds.i -> _ResetPositions; _ChangePossession }
+		
 	}
-};
+	[]
+	[paused || possession != i] Skip
+;
 
-TakeTeamAction(i) = |||j:{0, 1} @ Move(i, j);
+TakeTeamAction(i) = (|||j:{0, 1} @ Move(i, j));
 //||| Shoot(i);
 
-TakeAction = [time > 0] Tick { time--; } -> (TakeTeamAction(0) ||| TakeTeamAction(1)); TakeAction
-	[] [time <= 0] Skip;
+TakeAction =
+	[time > 0] Tick { time--; } -> (TakeTeamAction(0) ||| TakeTeamAction(1)); TakeAction
+	[]
+	[time <= 0] Skip;
 
-PlayGame = _ResetPositions; TakeAction;
+PlayGame = _Reset; TakeAction;
 
 #define FirstTeamWin scores[0] > scores[1] && time <= 0;
 #define SecondTeamWin scores[1] > scores[0] && time <= 0;
