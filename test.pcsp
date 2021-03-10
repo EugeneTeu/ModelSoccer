@@ -12,10 +12,10 @@
 #define PlayersPerTeam 2;
 #alphabet ValidateMovement {X}; 
 
-hvar time = 10;
+var time = 10;
 hvar ball = 6;
 hvar possession = 0; // initially, undecided possession
-hvar scores = [0, 0];
+var scores = [0, 0];
 hvar toReset = 0;
 hvar hasBallMoved = 0;
 hvar shoot_probabilities[3][5] = [ // shooting from left pos to right goal, grp by (2, 5, 8), (3, 6, 9) and (4, 7, 10). Sum of each row add up to 100
