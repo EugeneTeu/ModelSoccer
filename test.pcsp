@@ -10,99 +10,226 @@
 // 0 is out of bounds
 
 #define PlayersPerTeam 2;
+#alphabet ValidateMovement {X}; 
 
 hvar time = 10;
 hvar ball = 6;
-hvar possession = -1; // initially, undecided possession
+hvar possession = 0; // initially, undecided possession
 var scores = [0, 0];
-
-hvar positions[2][2] = [
+hvar toReset = 0;
+hvar hasBallMoved = 0;
+hvar action_probabilities[3][6] = [ // shooting from left pos to right goal, grp by (2, 5, 8), (3, 6, 9) and (4, 7, 10), sum of each row add up to 100
+	1, 4, 20, 4, 11, 60, // Left zone - 3/5 no shoot, 2/5 shoot
+	21, 3, 15, 13, 18, 33, // Middle zone - 1/3 no shoot, 2/3 shoot
+	51, 1, 10, 14, 19, 5 // Right zone - 1/20 no shoot, 19/20 shoot
+];
+hvar TeamFormation[2][2] = [
 	6, 5,
 	6, 7
 ];
-hvar action_probabilities[2][5] = [
-	10, 1, 9, 50, 30, // [Score, OwnGoal, MissKeepPossession, MissChangePossession, OutOfBounds]
-	20, 1, 4, 50, 25 // each row must add up to 100
+hvar positions[2][2] = [
+	TeamFormation[0][0], TeamFormation[0][1],
+	TeamFormation[1][0], TeamFormation[1][1]
 ];
-//hvar TeamFormation[2][PlayersPerTeam] = []
 hvar movement_type = 0;
+hvar actual_team[2] = [-1, 1];
 
-DecideFirstPossession = []i:{0, 1} @ GivePossession.i { possession = i; } -> Skip;
+DecideFirstPossession() = []i:{-1, 1} @ GivePossession.i { possession = i; } -> Skip;
 
-TakeAction = [time > 0] Tick { time--; } -> ((TakeTeamAction(0); TakeTeamAction(1)) [] (TakeTeamAction(1); TakeTeamAction(0))); TakeAction
-	[] [time <= 0] Skip;
+/////////////////////
+// General actions //
+/////////////////////
 
-TakeTeamAction(i) = ([possession == 0] Movement.i {movement_type = 1} -> Skip [] [possession == 1] Movement.i {movement_type = -1} -> Skip); Move(i); 
-	[possession != i] DefensiveActions(i) [] [possession == i] OffensiveActions(i);
+TakeActionMove() = 
+	[time > 0] Tick { time--; toReset = 0; } -> ((TeamMove(0); TeamMove(1)) [] (TeamMove(1); TeamMove(0))); TakeActionOthers()
+	[]
+	[time <= 0] Skip;
 
-DefensiveActions(i) = Steal(i);
+TakeActionOthers() =
+	((TeamOtherActions(0); ([toReset != 0] Skip [] TeamOtherActions(1)))
+	[]
+	(TeamOtherActions(1); ([toReset != 0] Skip [] TeamOtherActions(0))));
+	TakeActionMove();
 
-OffensiveActions(i) = Shoot(i);
+Reset() = 
+	[toReset == 1] ResetGoal { positions = TeamFormation; ball = 6; } -> Skip
+	[]
+	[toReset != 1] ResetOut { positions = TeamFormation; ball = 6 + possession; } -> Skip;
+	
+//////////////////////
+// Movement actions //
+//////////////////////
+
+TeamMove(i) = 
+	([possession == -1] RightMovement.i {movement_type = 1; hasBallMoved = 0; } -> Skip
+	[]
+	[possession == 1] LeftMovement.i {movement_type = -1; hasBallMoved = 0; } -> Skip);
+	Move(i);
 
 ValidateMovement(team, player, action) = 
-	ifb ((positions[team][player] + action < 10) && (positions[team][player] + action > 2)) {
-		if ((action == 3) || (action == -3)) {
-			move.team.player {positions[team][player] = positions[team][player] + action;} -> Skip
+	if (positions[team][player] + action <= 10 && positions[team][player] + action >= 2) {
+		if (action == 3 || action == -3) {
+			move.team.player {
+				if (hasBallMoved == 0 && possession == actual_team[team] && positions[team][player] == ball) {
+					ball = positions[team][player] + action;
+					hasBallMoved = 1;
+				}
+				positions[team][player] = positions[team][player] + action;
+			} -> Skip
 		}
 		else {
 			if (action == 1) {
-				ifb ((positions[team][player] != 4) && (positions[team][player] != 7) && (positions[team][player] != 10)) {
-					move.team.player {positions[team][player] = positions[team][player] + action;} -> Skip
+				if (positions[team][player] != 4 && positions[team][player] != 7 && positions[team][player] != 10) {
+					move.team.player {
+						if (hasBallMoved == 0 && possession == actual_team[team] && positions[team][player] == ball) {
+							ball = positions[team][player] + action;
+							hasBallMoved = 1;
+						}
+						positions[team][player] = positions[team][player] + action;
+					} -> Skip
+				}
+				else {
+					InvalidMovement.team.player -> Skip
 				}
 			}
 			else {
-				ifb ((positions[team][player] != 2) && (positions[team][player] != 5) && (positions[team][player] != 8)) {
-					move.team.player {positions[team][player] = positions[team][player] + action;} -> Skip
+				if (positions[team][player] != 2 && positions[team][player] != 5 && positions[team][player] != 8) {
+					move.team.player {
+						if (hasBallMoved == 0 && possession == actual_team[team] && positions[team][player] == ball) {
+							ball = positions[team][player] + action;
+							hasBallMoved = 1;
+						}
+						positions[team][player] = positions[team][player] + action;
+					} -> Skip
+				}
+				else {
+					InvalidMovement.team.player -> Skip
 				}
 			}
 		}
+	}
+	else {
+		InvalidMovement.team.player -> Skip
 	};
 
 Move(i) = || j:{0..PlayersPerTeam - 1} @ pcase {
-			1: ValidateMovement(i, j, -1 * movement_type)
-			3: ValidateMovement(i, j, -3)
-			3: ValidateMovement(i, j, 3)
-			4: ValidateMovement(i, j, movement_type)
+			2: MoveAway.i.j -> ValidateMovement(i, j, -1 * movement_type)
+			5: MoveUp.i.j -> ValidateMovement(i, j, -3)
+			5: MoveDown.i.j -> ValidateMovement(i, j, 3)
+			6: MoveTo.i.j -> ValidateMovement(i, j, movement_type)
+			2: Stay.i.j -> Skip
 	};
 
-Shoot(i) = Skip;
-Steal(i) = Skip;
+///////////////////
+// Other actions //
+//////////////////
 
-//
-//Shoot(i) = pcase {
-//	action_probabilities[i][0]: Score.i {
-//		ball = 6;
-//		positions[0] = 6;
-//		positions[1] = 6;
-//		possession = (possession + 1) % 2;
-//		scores[i]++;
-//	} -> Skip
-//	action_probabilities[i][1]: OwnGoal.i {
-//		ball = 6;
-//		positions[0] = 6;
-//		positions[1] = 6;
-//		possession = (possession + 1) % 2;
-//		scores[(i + 1) % 2]++;
-//	} -> Skip
-//	action_probabilities[i][2]: MissKeepPossession.i -> Skip
-//	action_probabilities[i][3]: MissChangePossession.i {
-//		ball = positions[(i + 1) % 2]; // Set ball to where opposing player is
-//		possession = (possession + 1) % 2; // Change possession
-//	} -> Skip
-//	action_probabilities[i][4]: OutOfBounds.i {
-//		if (i == 0) {
-//			ball = 7;
-//			positions[1] = 7;
-//		} else {
-//			ball = 5;
-//			positions[0] = 5;
-//		};
-//		possession = (possession + 1) % 2;
-//	} -> Skip
-//};
-//
+// possible improvement - rn the whole team will take def/off actions, so if successful, then turnover, but other teammates will not do anything cause the actions are wrong now
+TeamOtherActions(i) = [possession != actual_team[i]] DefensiveActions(i) [] [possession == actual_team[i]] OffensiveActions(i);
 
-PlayGame = DecideFirstPossession; TakeAction;
+// Offensive actions //
+
+OffensiveActions(i) = [time < 3] Shoot(i) [] ShootOrPass(i);
+
+ShootOrPass(i) = Skip;
+
+// hardcoded - need to abstract in the future
+BallToClosest(i, val) = 
+	[i == 0] 
+	[]
+	[i == 1];
+
+Shoot(i) = 
+	[ball % 3 == 2] pcase {
+		action_probabilities[1 + actual_team[i]][0]: Score.i {
+			possession = -1 * possession;
+			ball = possession * 5 + 6;
+			scores[i]++;
+			toReset = 1;
+		} -> Skip
+		action_probabilities[1 + actual_team[i]][1]: OwnGoal.i {
+			ball = possession * 5 + 6;
+			scores[(i + 1) % 2]++;
+			toReset = 1;
+		} -> Skip
+		action_probabilities[1 + actual_team[i]][2]: OutOfBounds.i {
+			possession = -1 * possession;
+			toReset = 2;
+		} -> Skip
+		action_probabilities[1 + actual_team[i]][3]: MissKeepPossession.i -> BallToClosest(i, -5 * possession + 6)
+		action_probabilities[1 + actual_team[i]][4]: MissChangePossession.i {
+			possession = -1 * possession;
+		} -> BallToClosest((i + 1) % 2, 5 * possession + 6)
+		action_probabilities[1 + actual_team[i]][5]: DontShoot.i -> Skip
+	}
+	[]
+	[ball % 3 == 0] pcase {
+		action_probabilities[1][0]: Score.i {
+			possession = -1 * possession;
+			ball = possession * 5 + 6;
+			scores[i]++;
+			toReset = 1;
+		} -> Skip
+		action_probabilities[1][1]: OwnGoal.i {
+			ball = possession * 5 + 6;
+			scores[(i + 1) % 2]++;
+			toReset = 1;
+		} -> Skip
+		action_probabilities[1][2]: OutOfBounds.i {
+			possession = -1 * possession;
+			toReset = 2;
+		} -> Skip
+		action_probabilities[1][3]: MissKeepPossession.i -> BallToClosest(i, -5 * possession + 6)
+		action_probabilities[1][4]: MissChangePossession.i {
+			possession = -1 * possession;
+		} -> BallToClosest((i + 1) % 2, 5 * possession + 6)
+		action_probabilities[1][5]: DontShoot.i -> Skip
+	}
+	[]
+	[ball % 3 == 1] pcase {
+		action_probabilities[1 - actual_team[i]][0]: Score.i {
+			possession = -1 * possession;
+			ball = possession * 5 + 6;
+			scores[i]++;
+			toReset = 1;
+		} -> Skip
+		action_probabilities[1 - actual_team[i]][1]: OwnGoal.i {
+			ball = possession * 5 + 6;
+			scores[(i + 1) % 2]++;
+			toReset = 1;
+		} -> Skip
+		action_probabilities[1 - actual_team[i]][2]: OutOfBounds.i {
+			possession = -1 * possession;
+			toReset = 2;
+		} -> Skip
+		action_probabilities[1 - actual_team[i]][3]: MissKeepPossession.i -> BallToClosest(i, -5 * possession + 6)
+		action_probabilities[1 - actual_team[i]][4]: MissChangePossession.i {
+			possession = -1 * possession;
+		} -> BallToClosest((i + 1) % 2, 5 * possession + 6)
+		action_probabilities[1 - actual_team[i]][5]: DontShoot.i -> Skip
+	};
+
+// need to find a way to abstract beyond 2v2 - I think is ok for multiple passes in a single team
+Pass(i) =
+	[positions[i][0] == ball] passToTeamMate1.i {ball = positions[i][1]} -> Skip
+	[]
+	[positions[i][1] == ball] passToTeamMate0.i {ball = positions[i][0]} -> Skip;
+//Pass(i) = ||| j:{0..PlayersPerTeam - 1} @ [positions[i][j] == ball] pass.i.j {ball = } [] Skip;
+
+// Defensive actions //
+
+DefensiveActions(i) = Steal(i);
+
+Steal(i) = ||| j:{0..PlayersPerTeam - 1} @ [positions[i][j] == ball] AttemptTackle(i) [] Skip;
+
+AttemptTackle(i) = [possession != actual_team[i]] pcase {
+		2: ChangePossession.i {possession = i;} -> Skip
+		8: KeepPossession.possession -> Skip
+		}
+		[]
+		[possession == actual_team[i]] Skip;
+
+PlayGame = DecideFirstPossession(); TakeActionMove();
 
 #define FirstTeamWin scores[0] > scores[1] && time <= 0;
 #define SecondTeamWin scores[1] > scores[0] && time <= 0;
