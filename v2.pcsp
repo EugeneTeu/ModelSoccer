@@ -5,90 +5,150 @@
 // +-----+-----+-----+-----+-----+
 // |     |  8  |  9  |  10 |     |
 // +-----+-----+-----+-----+-----+
-// 1 is team 1 goal
-// 11 is team 2 goal
+// 1 is team 0 goal
+// 11 is team 1 goal
 // 0 is out of bounds
 
-hvar time = 2;
+enum {
+	NEUTRAL,
+	OFFENSIVE,
+	DEFENSIVE
+};
+
+var time = 2;
 hvar ball = 6;
 hvar possession = -1; // initially, undecided possession
 var scores = [0, 0];
-hvar positions = [6, 6];
+hvar positions[2][2] = [
+	6, 6,
+	6, 6
+];
 hvar action_probabilities[2][5] = [
 	10, 1, 9, 50, 30, // [Score, OwnGoal, MissKeepPossession, MissChangePossession, OutOfBounds]
 	20, 1, 4, 50, 25 // each row must add up to 100
 ];
+hvar possession_ratios = [50, 50]; // must add up to 100
+hvar strategies = [NEUTRAL, NEUTRAL];
 
-DecideFirstPossession = []i:{0, 1} @ GivePossession.i { possession = i; } -> Skip;
+_DribbleLeft(i, j) = DribbleLeft.i.j {
+	if (positions[i][j] != 2 && positions[i][j] != 5 && positions[i][j] != 8) {
+		ball = ball - 1;
+		positions[i][j] = positions[i][j] - 1;
+	}
+} -> Skip;
 
-Move(i) =
-	[positions[i] != 2 && positions[i] != 5 && positions[i] != 8] MoveLeft.i {
-		if (possession == i) {
-			ball = ball - 1;
-		};
-		positions[i] = positions[i] - 1;
-	} -> Skip
- [] [positions[i] != 2 && positions[i] != 3 && positions[i] != 4] MoveUp.i {
-		if (possession == i) {
-			ball = ball - 3;
-		};
-		positions[i] = positions[i] - 3;
-	} -> Skip
- [] [positions[i] != 4 && positions[i] != 7 && positions[i] != 10] MoveRight.i {
- 		if (possession == i) {
-			ball = ball + i;
-		};
-		positions[i] = positions[i] + 1;
- 	} -> Skip
- [] [positions[i] != 8 && positions[i] != 9 && positions[i] != 10] MoveDown.i {
- 		if (possession == i) {
- 			ball = ball + 3;
- 		};
- 		positions[i] = positions[i] + 3;
- 	} -> Skip
-;
+_DribbleUp(i, j) = DribbleUp.i.j {
+	if (positions[i][j] != 2 && positions[i][j] != 3 && positions[i][j] != 4) {
+		ball = ball - 3;
+		positions[i][j] = positions[i][j] - 3;
+	}
+} -> Skip;
 
-Shoot(i) = pcase {
-	action_probabilities[i][0]: Score.i {
-		ball = 6;
-		positions[0] = 6;
-		positions[1] = 6;
-		possession = (possession + 1) % 2;
-		scores[i]++;
-	} -> Skip
-	action_probabilities[i][1]: OwnGoal.i {
-		ball = 6;
-		positions[0] = 6;
-		positions[1] = 6;
-		possession = (possession + 1) % 2;
-		scores[(i + 1) % 2]++;
-	} -> Skip
-	action_probabilities[i][2]: MissKeepPossession.i -> Skip
-	action_probabilities[i][3]: MissChangePossession.i {
-		ball = positions[(i + 1) % 2]; // Set ball to where opposing player is
-		possession = (possession + 1) % 2; // Change possession
-	} -> Skip
-	action_probabilities[i][4]: OutOfBounds.i {
-		if (i == 0) {
-			ball = 7;
-			positions[1] = 7;
-		} else {
-			ball = 5;
-			positions[0] = 5;
-		};
-		possession = (possession + 1) % 2;
-	} -> Skip
+_DribbleRight(i, j) = DribbleRight.i.j {
+	if (positions[i][j] != 4 && positions[i][j] != 7 && positions[i][j] != 10) {
+		ball = ball + 1;
+		positions[i][j] = positions[i][j] + 1;
+	}
+} -> Skip;
+
+_DribbleDown(i, j) = DribbleDown.i.j {
+	if (positions[i][j] != 8 && positions[i][j] != 9 && positions[i][j] != 10) {
+ 		ball = ball + 3;
+ 		positions[i][j] = positions[i][j] + 3;
+	}
+} -> Skip;
+
+_MoveLeft(i, j) = MoveLeft.i.j {
+	if (positions[i][j] != 2 && positions[i][j] != 5 && positions[i][j] != 8) {
+		positions[i][j] = positions[i][j] - 1;
+	}
+} -> Skip;
+
+_MoveUp(i, j) = MoveUp.i.j {
+	if (positions[i][j] != 2 && positions[i][j] != 3 && positions[i][j] != 4) {
+		positions[i][j] = positions[i][j] - 3;
+	}
+} -> Skip;
+
+_MoveRight(i, j) = MoveRight.i.j {
+	if (positions[i][j] != 4 && positions[i][j] != 7 && positions[i][j] != 10) {
+		positions[i][j] = positions[i][j] + 1;
+	}
+} -> Skip;
+
+_MoveDown(i, j) = MoveDown.i.j {
+	if (positions[i][j] != 8 && positions[i][j] != 9 && positions[i][j] != 10) {
+ 		positions[i][j] = positions[i][j] + 3;
+	}
+} -> Skip;
+
+MoveTowardsBall(i, j) = 
+
+Move(i, j) = if (strategies[i] == NEUTRAL) {
+		MoveTowardsBall(i, j);		
+	} else if (strategies[i] == OFFENSIVE) {
+		MoveTowardsOpponentGoal(i, j);
+	} else if (strategies[i] == DEFENSIVE) {
+		MoveTowardsBall(i, j);
+	};
+
+_ResetBall = ResetBall {
+	ball = 6;
+} -> Skip;
+
+_ResetTeamPositions(i) = ResetTeamPositions.i {
+	if (i == 0) {
+		positions[0][0] = 2;
+		positions[0][1] = 8;
+	} else if (i == 1) {
+		positions[1][0] = 4;
+		positions[1][1] = 10;
+	}
+} -> Skip;
+
+_ResetPositions = atomic {
+	_ResetBall; _ResetTeamPositions(0); _ResetTeamPositions(1)
 };
 
-TakeTeamAction(i) = Move(i) [] [possession == i] Shoot(i);
+_ChangePossession = ChangePossession {
+	possession = (possession + 1) % 2;
+} -> Skip;
+
+TakePossession(i) = []j:{0, 1} @ [positions[i][j] == ball] {
+	possession = i
+} -> Skip;
+
+Shoot(i) = if (possession == i) {
+	atomic {
+		pcase {
+			action_probabilities[i][0]: Score.i {
+				scores[i]++;
+			} -> (_ResetPositions; _ChangePossession)
+		
+			action_probabilities[i][1]: OwnGoal.i {
+				scores[(i + 1) % 2]++;
+			} -> (_ResetPositions; _ChangePossession)
+			
+			action_probabilities[i][2]: MissKeepPossession.i -> Skip
+			
+			action_probabilities[i][3]: MissChangePossession.i {
+				ball = positions[(i + 1) % 2][1]; // Set ball to where opposing player is
+			} -> _ChangePossession
+			
+			action_probabilities[i][4]: OutOfBounds.i -> (_ResetPositions; _ChangePossession)
+		}
+	}
+};
+
+TakeTeamAction(i) = |||j:{0, 1} @ Move(i, j) ||| Shoot(i);
 
 TakeAction = [time > 0] Tick { time--; } -> pcase {
-		[0.5]: TakeTeamAction(0); TakeAction
-		[0.5]: TakeTeamAction(1); TakeAction
+		possession_ratios[0]: TakeTeamAction(0); TakeAction
+		possession_ratios[1]: TakeTeamAction(1); TakeAction
 	}
 	[] [time <= 0] Skip;
 
-PlayGame = DecideFirstPossession; TakeAction;
+PlayGame = _ResetPositions; TakeAction;
 
 #define FirstTeamWin scores[0] > scores[1] && time <= 0;
 #define SecondTeamWin scores[1] > scores[0] && time <= 0;
