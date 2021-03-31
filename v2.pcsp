@@ -22,9 +22,9 @@ enum {
 	DEFENSIVE
 };
 
-var time = 1;
+var time = 2;
 hvar ball_position[2] = [1, 1];
-hvar possession[2] = [-1, -1]; // initially, undecided possession
+var possession[2] = [-1, -1]; // initially, undecided possession
 var scores = [0, 0];
 hvar positions[2][2][2] = [0, 0, 0, 0, 0, 0, 0, 0];
 hvar shoot_probabilities[2][3] = [
@@ -224,7 +224,7 @@ _MoveTowardsOpponentGoal(team, player) =
 ;
 
 _Move(team, player) = 
-	[strategies[team] == NEUTRAL] 
+	[strategies[team] == NEUTRAL]
 		_MoveTowardsBall(team, player); (
 			[positions[team][player][0] == ball_position[0] && positions[team][player][1] == ball_position[1]] atomic { _GetPossession(team, player) }
 			[]
@@ -274,8 +274,6 @@ _TakeTeamAction(team) = |||player:{0, 1} @ (
 	[!frozen && possession[0] == team && possession[1] == player] _Dribble(team, player)
 	[]
 	[!frozen && possession[0] == team && possession[1] == player] _Shoot(team, player)
-//	[]
-//	[!frozen && (possession[0] != team || possession[1] != player) && strategies[team] == DEFENSIVE && positions[team][player][0] == ball_position[0] && positions[team][player][1] == ball_position[1]] _Tackle(team, player)
 //	[]
 //	[possession[0] == team && possession[1] == player] _Pass(team, player)
 	[]
