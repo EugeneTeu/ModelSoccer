@@ -24,7 +24,7 @@ enum {
 
 var time = 2;
 hvar ball_position[2] = [1, 1];
-hvar possession[2] = [-1, -1]; // initially, undecided possession, [team, player holding ball]
+var possession[2] = [-1, -1]; // initially, undecided possession, [team, player holding ball]
 var scores = [0, 0];
 hvar positions[2][11][2] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // T player [row or col] -> 0 , 1 refers to row or col 
 hvar shoot_probabilities[4][3] = [
