@@ -26,7 +26,7 @@ var time = 2;
 hvar ball_position[2] = [1, 1];
 var possession[2] = [-1, -1]; // initially, undecided possession, [team, player holding ball]
 var scores = [0, 0];
-hvar positions[2][11][2] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // T player [row or col] -> 0 , 1 refers to row or col 
+hvar positions[2][11][2] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // T player [row or col] -> 0 , 1 refers to row or col 
 hvar shoot_probabilities[4][3] = [
 	10, 5, 85, // [Score, HitGoalPost, OutOfBounds]
 	20, 5, 75,  // each row must add up to 100
@@ -153,14 +153,14 @@ _SetKickoffPositions(team) = SetKickoffPositions.team {
 } -> Skip;
 
 _Reset = _ResetBall; (
-	[possession[0] == 0] _SetDefaultPositions(1); _SetKickoffPositions(0)
+	[possession[0] == 0] atomic {_SetDefaultPositions(1); _SetKickoffPositions(0) }
 	[]
-	[possession[0] == 1] _SetDefaultPositions(0); _SetKickoffPositions(1)
+	[possession[0] == 1] atomic { _SetDefaultPositions(0); _SetKickoffPositions(1) }
 );
 
 // _Reset process, then execute the next 
 
-_GetTeamPossession(team) = []player:{0,1,2,3,4,5,6,7,8,9,10} @ _GetPossession(team, player); // _GetPossesion has a parameter player with choice either 0 or 1. 
+_GetTeamPossession(team) = []player:{0,1,2,3,4} @ _GetPossession(team, player); // _GetPossesion has a parameter player with choice either 0 or 1. 
 
 _GetPossession(team, player) = GetPossession.team.player {
 	// We update strategies here so that this process can be directly used
@@ -224,23 +224,24 @@ _DribbleDownRight(team, player) = DribbleDownRight.team.player {
 	positions[team][player][1]++;
 } -> Skip;
 
-_DribbleTowardsOpponentGoal(team, player) =
+_DribbleTowardsOpponentGoal(team, player) = atomic {
 	[team == 0 && positions[team][player][1] != 2] _DribbleRight(team, player)
 	[]
 	[team == 0 && positions[team][player][1] == 2] Stay.team.player -> Skip
 	[]
 	[team == 1 && positions[team][player][1] != 0] _DribbleLeft(team, player)
 	[]
-	[team == 1 && positions[team][player][1] == 0] Stay.team.player -> Skip
+	[team == 1 && positions[team][player][1] == 0] Stay.team.player -> Skip }
 ;
 
-_Dribble(team, player) = 
+_Dribble(team, player) = atomic {
 	// Right now, any player who has the right to dribble must be in OFFENSIVE mode
 	[strategies[team] == NEUTRAL] Skip
 	[]
 	[strategies[team] == OFFENSIVE] _DribbleTowardsOpponentGoal(team, player)
 	[]
 	[strategies[team] == DEFENSIVE] Skip
+	}
 ;
 
 _Tackle(team, player) = pcase {
@@ -285,6 +286,7 @@ _MoveDownRight(team, player) = MoveDownRight.team.player {
 } -> Skip;
 
 _MoveTowardsBall(team, player) = // defensive team
+atomic {
 	[positions[team][player][0] == ball_position[0] && positions[team][player][1] == ball_position[1]] Stay.team.player -> Skip
 	[]
 	[positions[team][player][0] > ball_position[0] && positions[team][player][1] == ball_position[1]] _MoveUp(team, player)
@@ -302,34 +304,36 @@ _MoveTowardsBall(team, player) = // defensive team
 	[positions[team][player][0] < ball_position[0] && positions[team][player][1] < ball_position[1]] _MoveDownRight(team, player)
 	[]
 	[positions[team][player][0] < ball_position[0] && positions[team][player][1] > ball_position[1]] _MoveDownLeft(team, player)
+}
 ;
 
 _MoveTowardsOpponentGoal(team, player) = // offensive team
-	[team == 0 && positions[team][player][1] != 2] _MoveRight(team, player)
+	[team == 0 && positions[team][player][1] != 2] atomic { _MoveRight(team, player)}
 	[]
-	[team == 0 && positions[team][player][1] == 2] Stay.team.player -> Skip
+	[team == 0 && positions[team][player][1] == 2] atomic { Stay.team.player -> Skip }
 	[]
-	[team == 1 && positions[team][player][1] != 0] _MoveLeft(team, player)
+	[team == 1 && positions[team][player][1] != 0] atomic { _MoveLeft(team, player) }
 	[]
-	[team == 1 && positions[team][player][1] == 0] Stay.team.player -> Skip
+	[team == 1 && positions[team][player][1] == 0] atomic { Stay.team.player -> Skip }
 ;
 
 _Move(team, player) = 
-	[strategies[team] == NEUTRAL]
+	[strategies[team] == NEUTRAL] atomic {
 		_MoveTowardsBall(team, player); (
 			[positions[team][player][0] == ball_position[0] && positions[team][player][1] == ball_position[1]] atomic { _GetPossession(team, player) }
 			[]
 			[positions[team][player][0] != ball_position[0] || positions[team][player][1] != ball_position[1]] atomic { Wait.team.player -> Skip }
-		)
+		) }
 	[]
-	[strategies[team] == OFFENSIVE] _MoveTowardsOpponentGoal(team, player)
+	[strategies[team] == OFFENSIVE] atomic { _MoveTowardsOpponentGoal(team, player) }
 	[]
-	[strategies[team] == DEFENSIVE] 
+	[strategies[team] == DEFENSIVE] atomic {
 		_MoveTowardsBall(team, player); (
 			[positions[team][player][0] == ball_position[0] && positions[team][player][1] == ball_position[1]] atomic { _Tackle(team, player) }
 			[]
 			[positions[team][player][0] != ball_position[0] || positions[team][player][1] != ball_position[1]] atomic { Wait.team.player -> Skip }
 		)
+		}
 ;
 
 _LooseBall = atomic { LosePossession { 
@@ -349,32 +353,45 @@ _LooseBall = atomic { LosePossession {
 	1: SetBall.2.2 { ball_position[0] = 2; ball_position[1] = 2; } -> Skip
 }};
 
-_Shoot(team, player) = pcase {
-	shoot_probabilities[team][0]: atomic { Score.team {
+//_Shoot(team, player) = pcase {
+//	shoot_probabilities[team][0]: atomic { Score.team {
+//		scores[team]++;
+//	} -> _Freeze; _ChangePossession; _Reset }
+//
+//	shoot_probabilities[team][1]: atomic { HitGoalPost.team -> _LooseBall }
+//	
+//	shoot_probabilities[team][2]: atomic { OutOfBounds.team -> GoalKick.team -> _LooseBall }
+//};
+
+_Shoot(team, player) = atomic {
+	// Right now, any player who has the right to dribble must be in OFFENSIVE mode
+	 atomic { Score.team {
 		scores[team]++;
 	} -> _Freeze; _ChangePossession; _Reset }
+	[]
+	atomic { HitGoalPost.team -> _LooseBall }
+	[]
+	atomic { OutOfBounds.team -> GoalKick.team -> _LooseBall }
+	}
+;
 
-	shoot_probabilities[team][1]: atomic { HitGoalPost.team -> _LooseBall }
-	
-	shoot_probabilities[team][2]: atomic { OutOfBounds.team -> GoalKick.team -> _LooseBall }
-};
 
-_TakeTeamAction(team) = |||player:{0,1,2,3,4,5,6,7,8,9,10} @ ( // when a team takes action, these actions will occur independently of one another
+_TakeTeamAction(team) = ||player:{0,1,2,3,4} @ ( // when a team takes action, these actions will occur independently of one another
 	[!frozen && (possession[0] != team || possession[1] != player)] _Move(team, player)
 	[]
-	[!frozen && possession[0] == team && possession[1] == player] _Dribble(team, player)
-	[]
-	[!frozen && possession[0] == team && possession[1] == player] _Shoot(team, player)
+	[!frozen && possession[0] == team && possession[1] == player]( _Shoot(team, player))
+//	[]
+//	[!frozen && possession[0] == team && possession[1] == player] _Dribble(team, player)
 //	[]
 //	[possession[0] == team && possession[1] == player] _Pass(team, player)
 	[]
 	[frozen] Wait.team.player -> Skip
 );
 
-_TakeAction = // both teams take action at the same time
-	[time > 0] Tick { time--; } -> _Unfreeze; (_TakeTeamAction(0) ||| _TakeTeamAction(1)); _TakeAction
+_TakeAction = // both teams take action at the same time 
+	[time > 0 && scores[0] < 2 && scores[1] < 2]  Tick { time--; } -> _Unfreeze; (_TakeTeamAction(0) || _TakeTeamAction(1)); _TakeAction
 	[]
-	[time <= 0] Skip;
+	[time <= 0 || scores[0] > 2 || scores[1] > 2] Skip;
 
 _DecideFirstPossession = []team:{0, 1} @ _GetTeamPossession(team);
 
@@ -383,7 +400,9 @@ _PlayGame = _DecideFirstPossession; _Reset; _TakeAction;
 #define FirstTeamWin scores[0] > scores[1] && time <= 0;
 #define SecondTeamWin scores[1] > scores[0] && time <= 0;
 #define Draw scores[0] == scores[1] && time <= 0;
+#define maxScore scores[0] < 5 && scores[1] < 5;
 
+#assert _PlayGame reaches maxScore;
 #assert _PlayGame reaches FirstTeamWin;
 #assert _PlayGame reaches SecondTeamWin;
 #assert _PlayGame reaches Draw;
