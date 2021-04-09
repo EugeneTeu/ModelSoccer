@@ -21,280 +21,355 @@ namespace PAT.Lib
     public class SoccerCalc
     {
         // for book keeping
-        private static Random rand = new Random();
+        public static Random rand = new Random();
 
-        private static int possession = -1;
+        public const int NUMBER_OF_TEAMS = 2;
 
-        // Ball info
-        private static int ballPlayer = -1;
+        public const int NUMBER_OF_PLAYERS_PER_TEAM = 10;
 
-        private static int[] ballPosition = new int[2] { 3, 4 };
+        public const int TOTAL_NUMBER_OF_PLAYERS = NUMBER_OF_TEAMS * NUMBER_OF_PLAYERS_PER_TEAM;
+        
+        // public static int[,,] originalPlayerPosition = new int[2, 10, 2] { { { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 } },
+        //     { { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 } } };
 
-        // Player positions
-        private static int[,,] playerPosition = new int[2, 10, 2] { { { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 } },
-            { { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 } } };
-
-        private static int[,] goaliePosition = new int[2, 2] { { 3, 1 }, { 3, 7 } };
-
-        private static int tacklePlayer = -1;
+        public static int[] originalPlayerPosition = new int[40] { 3, 3, 1, 3, 2, 3, 4, 3, 5, 3, 1, 2, 2, 2, 3, 2, 4, 2, 5, 2, 3, 5, 1, 5, 2, 5, 4, 5, 5, 5, 1, 6, 2, 6, 3, 6, 4, 6, 5, 6 };
+        // private static int tacklePlayer = -1;
 
         ///////////////////
         // Probabilities //
         ///////////////////
         
         // Tackle stuff
-        private static int[,] playerDodgeTackleProb = new int[10, 2] { { 10, 1 }, { 10, 1 }, { 10, 1 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 1, 10 }, { 1, 10 }, { 1, 10 } };
+        public static int[,] playerDodgeTackleProb = new int[10, 2] { { 10, 1 }, { 10, 1 }, { 10, 1 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 1, 10 }, { 1, 10 }, { 1, 10 } };
 
         // Dribble stuff
-        private static int[] playerDribbleProb = new int[10] { 10, 10, 10, 9, 9, 9, 9, 9, 8, 8};
+        public static int[] playerDribbleProb = new int[10] { 10, 10, 10, 9, 9, 9, 9, 9, 8, 8};
 
         // Shoot stuff
-        // private static int[] playerShootProb = new int[10] { 5, 5, 5, 4, 4, 4, 4, 3, 3, 3 };
+        public static int[] playerShootProb = new int[10] { 6, 6, 6, 4, 4, 4, 4, 3, 3, 3 };
+
+        public static int[] playerScoreProb = new int[10] { 4, 3, 3, 2, 2, 2, 2, 1, 1, 1};
 
         // Pass stuff
-        // private static int[,] playerPassOrKeepProb = new int[10, 2] { { 10, 1 }, { 9, 2 }, { 8, 3 }, { 7, 4 }, { 6, 5 }, { 5, 6 }, { 4, 7 }, { 3, 8 }, { 2, 9 }, { 1, 10 } };
+        public static int[] playerPassProb = new int[10] { 1, 1, 1, 2, 2, 2, 2, 3, 3, 3 };
 
         // Set functions
-        public static int setPlayerPosition(int team, int player, int row, int col)
+        public static int[] setPlayerPosition(int[] playerPositions, int team, int player, int row, int col)
         {
-            if (1 <= row && row <= 5 && 1 <= col && col <= 7 && 0 <= team && team <= 1 && 0 <= player && player <= 9)
-            {
-                playerPosition[team, player, 0] = row;
-                playerPosition[team, player, 1] = col;
-                return 1;
-            }
-            return 1;
-        }
-
-        public static int setGoaliePosition(int team, int row, int col)
-        {
-            if ((1 == col || col == 7) && (2 <= row && row <= 4))
-            {
-                goaliePosition[team, 0] = row;
-                goaliePosition[team, 1] = col;
-                return 1;
-            }
-            return 1;
-        }
-
-        public static int setBallPosition(int row, int col)
-        {
-            if ((0 <= row && row <= 6) && (0 <= col && col <= 8))
-            {
-                ballPosition[0] = row;
-                ballPosition[1] = col;
-                return 1;
-            }
-            return 1;
-        }
-
-        public static int setPossession(int pos)
-        {
-            if (pos == -1 || pos == 1 || pos == 0)
-            {
-                possession = pos;
-                return -1;
-            }
-            return 1;
-        }
-
-        public static int setBallPlayer(int player)
-        {
-            if (0 <= player && player <= 10) // ball can be with the goalie too
-            {
-                ballPlayer = player;
-                return -1;
-            }
-            return 1;
+            int position = team * 20 + player;
+            playerPositions[position] = row;
+            playerPositions[position + 1] = col;
+            return playerPositions;
         }
 
         ////////////////////////
         // Movement functions //
         ////////////////////////
         
-        public static int move()
+        public static int[] move(int[] playerPositions, int possession, int[] ballPosition, int ballPlayer)
         {
+             if (possession == 7) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("Paaaaaaa " + possession + "  " );
+            }
             if (possession != -1)
             {
-                strategicMove();
+                return strategicMove(playerPositions, possession, ballPlayer);
             }
             else
             {
-                runToBall();
+                return runToBall(playerPositions, ballPosition);
             }
-            moveGoalie();
-            return 1;
         }
 
-        public static int dribble()
+        public static int[] strategicMove(int[] playerPositions, int possession, int ballPlayer)
         {
-            int playerRow = playerPosition[possession, ballPlayer, 0];
-            if (playerRow < 3)
-            {
-                playerPosition[possession, ballPlayer, 0] += 1;
+             if (possession == 7) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("movvvvv" + possession + "  ");
             }
-            else if (playerRow > 3)
+            for (int team = 0; team < NUMBER_OF_TEAMS; team += 1)
             {
-                playerPosition[possession, ballPlayer, 0] -= 1;
-            }
-
-            int multiplier = 1;
-            if (possession == 0)
-            {
-                multiplier = -1;
-            }
-            playerPosition[possession, ballPlayer, 1] -= (1 * multiplier);
-            if (playerPosition[possession, ballPlayer, 1] < 1)
-            {
-                playerPosition[possession, ballPlayer, 1] = 1;
-            }
-            else if (playerPosition[possession, ballPlayer, 1] > 7)
-            {
-                playerPosition[possession, ballPlayer, 1] = 7;
-            }
-
-            ballPosition[0] = playerPosition[possession, ballPlayer, 0];
-            ballPosition[1] = playerPosition[possession, ballPlayer, 1];
-
-            return 1;
-        }
-
-        private static void strategicMove()
-        {
-            for (int team = 0; team < playerPosition.GetLength(0); team += 1)
-            {
-                for (int player = 0; player < playerPosition.GetLength(1); player += 1)
-                {
+                for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player += 1)
+                {   
+                    // Player who carries the ball does not move
                     if (possession == team && player == ballPlayer)
                     {
                         continue;
                     }
-                    int playerRow = playerPosition[team, player, 0];
-                    if (playerRow < 3)
-                    {
-                        playerPosition[team, player, 0] += 1;
-                    }
-                    else if (playerRow > 3)
-                    {
-                        playerPosition[team, player, 0] -= 1;
-                    }
-
-                    int multiplier = 1;
-                    if (possession == 0)
-                    {
-                        multiplier = -1;
-                    }
-
+                    int playerOffsetIdxRow = team * TOTAL_NUMBER_OF_PLAYERS + player * 2;
+                    int playerOffsetIdxCol = playerOffsetIdxRow + 1;
                     int chance = rand.Next(0, 3);
+                    // TODO: Check deterministic or probabilistic
+                    
                     // 33 % to move diagonally towards goal
                     if (chance == 2)
                     {
-                        playerPosition[team, player, 1] -= (1 * multiplier);
-                        if (playerPosition[team, player, 1] < 1)
+                        int row = playerPositions[playerOffsetIdxRow];
+                        if (row < 3)
                         {
-                            playerPosition[team, player, 1] = 1;
+                            playerPositions[playerOffsetIdxRow] += 1;
                         }
-                        else if (playerPosition[team, player, 1] > 7)
+                        else if (row > 3)
                         {
-                            playerPosition[team, player, 1] = 7;
+                            playerPositions[playerOffsetIdxRow] -= 1;
                         }
+                    }
+
+                    // Determine direction to attack
+                    int direction = possession == 0 ? 1 : -1;
+                    playerPositions[playerOffsetIdxCol] += direction;
+                    // account for bounds
+                    if (playerPositions[playerOffsetIdxCol] < 1)
+                    {
+                        playerPositions[playerOffsetIdxCol] = 1;
+                    }
+                    else if (playerPositions[playerOffsetIdxCol] > 7)
+                    {
+                        playerPositions[playerOffsetIdxCol] = 7;
                     }
                 }
             }
+
+            return playerPositions;
         }
 
-        private static void runToBall()
+        public static int[] runToBall(int[] playerPositions, int[] ballPosition)
         {
-            for (int team = 0; team < playerPosition.GetLength(0); team += 1)
+            for (int team = 0; team < NUMBER_OF_TEAMS; team += 1)
             {
-                for (int player = 0; player < playerPosition.GetLength(1); player += 1)
+                for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player += 1)
                 {
-                    int playerRow = playerPosition[team, player, 0];
-                    int playerCol = playerPosition[team, player, 1];
+                    int playerOffsetIdxRow = team * TOTAL_NUMBER_OF_PLAYERS + player * 2;
+                    int playerOffsetIdxCol = playerOffsetIdxRow + 1;
+
+                    int playerRow = playerPositions[playerOffsetIdxRow];
+                    int playerCol = playerPositions[playerOffsetIdxCol];
                     int ballRow = ballPosition[0];
                     int ballCol = ballPosition[1];
                     if (playerRow < ballRow)
                     {
-                        playerPosition[team, player, 0] += 1;
+                        playerPositions[playerOffsetIdxRow] += 1;
                     }
                     else if (playerRow > ballRow)
                     {
-                        playerPosition[team, player, 0] -= 1;
+                        playerPositions[playerOffsetIdxRow] -= 1;
                     }
                     if (playerCol < ballCol)
                     {
-                        playerPosition[team, player, 1] += 1;
+                        playerPositions[playerOffsetIdxCol] += 1;
                     }
                     else if (playerCol > ballCol)
                     {
-                        playerPosition[team, player, 1] -= 1;
+                        playerPositions[playerOffsetIdxCol] -= 1;
                     }
                 }
             }
+            return playerPositions;
         }
 
-        // to complete
-        private static void moveGoalie()
-        { 
-        
+        public static int[] dribble(int[] playerPositions, int possession, int ballPlayer)
+        {
+            int playerOffsetIdxRow = (possession * TOTAL_NUMBER_OF_PLAYERS) + (ballPlayer * 2);
+            int playerOffsetIdxCol = playerOffsetIdxRow + 1;
+            if (possession == 7) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("Possession > 1 " + possession + "  ");
+            }
+            if (ballPlayer < 0) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("BallPlayer < 0");
+            }
+
+            if (playerOffsetIdxRow < 0) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("Access an empty stack!");
+            }
+            if (playerOffsetIdxRow > 39) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("Access an empty stack! 2 playerOffsetIdxRow: " + playerOffsetIdxRow);
+            }
+
+            int row = playerPositions[playerOffsetIdxRow];
+            if (row < 3)
+            {
+                playerPositions[playerOffsetIdxRow] += 1;
+            }
+            else if (row > 3)
+            {
+                playerPositions[playerOffsetIdxRow] -= 1;
+            }
+
+            // Determine direction to attack
+            int direction = possession == 0 ? 1 : -1;
+            playerPositions[playerOffsetIdxCol] += direction;
+            // account for bounds
+            if (playerPositions[playerOffsetIdxCol] < 1)
+            {
+                playerPositions[playerOffsetIdxCol] = 1;
+            }
+            else if (playerPositions[playerOffsetIdxCol] > 7)
+            {
+                playerPositions[playerOffsetIdxCol] = 7;
+            }
+            return playerPositions;
         }
+
+        public static int[] getDribbleBall(int[] playerPositions, int ballPlayer, int possession)
+        {
+             if (possession == 7) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("getDba " + possession + "  ");
+            }
+            int[] positionBall = new int[2];
+            int playerOffsetIdxRow = possession * TOTAL_NUMBER_OF_PLAYERS + ballPlayer * 2;
+            int playerOffsetIdxCol = playerOffsetIdxRow + 1;
+            positionBall[0] = playerPositions[playerOffsetIdxRow];
+            positionBall[1] = playerPositions[playerOffsetIdxCol];
+            return positionBall;
+        }
+        // to complete
+        // public static void moveGoalie()
+        // { 
+        
+        // }
 
         ///////////////////////////
         // Probability functions //
         ///////////////////////////
         
-        private static int getPlayerTackleDodge(int player, int action)
-        {
-            return playerDodgeTackleProb[player, action];
-        }
-
-        // public static double getTackleProb()
+        // private static int getPlayerTackleDodge(int player, int action)
         // {
-        //     int team = 0;
-        //     if (possession == 0)
-        //     {
-        //         team = 1;
-        //     }
-        //     int tackler = -1;
-        //     double ratio = 0;
-        //     for (int player = 0; player < playerPosition.GetLength(1); player += 1)
-        //     {
-        //         if (playerPosition[team, player, 0] != ballPosition[0] || playerPosition[team, player, 1] != ballPosition[1])
-        //         {
-        //             continue;
-        //         }
-        //         double calced = (double)getPlayerTackleDodge(player, 1) / (double)getPlayerTackleDodge(ballPlayer, 0);
-        //         if (calced > ratio)
-        //         {
-        //             ratio = calced;
-        //             tackler = player;
-        //         }
-        //     }
-        //     if (tackler == -1)
-        //     {
-        //         return 0;
-        //     }
-        //     tacklePlayer = tackler;
-        //     return ratio;
+        //     return playerDodgeTackleProb[player, action];
         // }
 
-        public static int updateTackle()
+        public static int getDodge(int ballPlayer)
         {
-            if (possession == 0)
+            return playerDodgeTackleProb[ballPlayer, 0];
+        }
+
+        public static int getTackle(int[] playerPositions, int[] ballPosition, int possession)
+        {
+             if (possession == 7) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("tavklrs" + possession + "  ");
+            }
+            if (possession == -1) {
+                return 0;
+            }
+
+            int team = possession == 0 ? 1 : 0;
+            int best = -1;
+            for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player += 1)
             {
-                possession = 1;
+                int playerOffsetIdxRow = team * TOTAL_NUMBER_OF_PLAYERS + player * 2;
+                int playerOffsetIdxCol = playerOffsetIdxRow + 1;
+                if (playerPositions[playerOffsetIdxRow] != ballPosition[0] || playerPositions[playerOffsetIdxCol] != ballPosition[1])
+                {
+                    continue;
+                }
+
+                int ratio = playerDodgeTackleProb[player, 1];
+                if (ratio > best)
+                {
+                    best = ratio;
+                }
+            }
+            if (best == -1) {
+                return 0;
+            }
+            return best;
+        }
+
+        public static int getTacklePlayer(int[] playerPositions, int[] ballPosition, int possession)
+        {
+             if (possession == 7) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("getetate > 1 " + possession + "  " );
+            }
+            if (possession == -1) {
+                return 0;
+            }
+
+            int team = possession == 0 ? 1 : 0;
+            int best = -1;
+            int bestPlayer = -1;
+            for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player += 1)
+            {
+                int playerOffsetIdxRow = team * TOTAL_NUMBER_OF_PLAYERS + player * 2;
+                int playerOffsetIdxCol = playerOffsetIdxRow + 1;
+                if (playerPositions[playerOffsetIdxRow] != ballPosition[0] || playerPositions[playerOffsetIdxCol] != ballPosition[1])
+                {
+                    continue;
+                }
+
+                int ratio = playerDodgeTackleProb[player, 1];
+                if (ratio > best)
+                {
+                    best = ratio;
+                    bestPlayer = player;
+                }
+            }
+            if (best == -1) {
+                return 0;
+            }
+            return bestPlayer;
+        }
+
+
+        // public static int updateTackle()
+        // {
+        //     if (possession == 0)
+        //     {
+        //         possession = 1;
+        //     }
+        //     else
+        //     {
+        //         possession = 0;
+        //     }
+        //     ballPlayer = tacklePlayer;
+        //     return 1;
+        // }
+
+        public static int getDribbleProb(int ballPlayer)
+        {
+            return playerDribbleProb[ballPlayer];
+        }
+
+        public static int getShootProb(int ballPlayer, int[] ballPosition, int possession) {
+             if (possession == 7) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("Possession >asdasdadadadaads 1 " + possession + "  ");
+            }
+            int target;
+            target = possession == 0 ? 8 : 0;
+            int col_diff = -1;
+            if (target == 8)
+            {
+                col_diff = target - ballPosition[1];
+            } 
+            else 
+            {
+                col_diff = ballPosition[1] - target;
+            }
+
+            if (col_diff > 3) 
+            {
+                return 0;
+            }
+
+            int row_diff = -1;
+            if (ballPosition[0] >= 3) 
+            {
+                row_diff = ballPosition[0] - 2;
             }
             else
             {
-                possession = 0;
+                row_diff = 4 - ballPosition[0];
             }
-            ballPlayer = tacklePlayer;
-            return 1;
+            int shootProb = playerShootProb[ballPlayer] / row_diff - (col_diff - 1);
+            return shootProb;
+        
         }
 
-        public static int getDribbleProb()
+        public static int getScoreProb(int ballPlayer) 
         {
-            return playerDribbleProb[ballPlayer];
+            return playerScoreProb[ballPlayer];
+        }
+
+        public static int[] resetPlayerPosition() 
+        {
+            return originalPlayerPosition;
         }
 
         // public static double getShootProb()
@@ -318,46 +393,111 @@ namespace PAT.Lib
         //     return playerShootProb[ballPlayer] / distance;
         // }
 
-        // //todo
-        // public static double getShootSuccessProb()
+        public static int getPassProb(int ballPlayer) 
+        {
+            return playerPassProb[ballPlayer];
+        }
+
+        public static int[] setPassTarget(int possession,  int[] ballPosition) {
+            // int currRow = ballPosition[0];
+            int currCol = ballPosition[1];
+
+            if (possession == 0) {
+                int finalCol = 7;
+                int resultantCol = rand.Next(currCol, finalCol+1);
+                int resultantRow = rand.Next(1,5+1);
+                return new int[2] { resultantRow, resultantCol } ;
+            } else if (possession == 1) {
+                int resultantCol = rand.Next(0, currCol+1);
+                int resultantRow = rand.Next(1,5+1);
+                return new int[2] {resultantRow, resultantCol};
+            } else {
+               throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException(" possession is invalid");
+            }
+        }
+
+        public static int getPassTarget(int ballPlayer, int possession, int[] playerPosition) {
+            // int nearestPlayer = ballPlayer;
+
+            // for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player++) {
+            //     int playerRow = playerPosition[possession * TOTAL_NUMBER_OF_PLAYERS + player * 2];
+            //     int playerCol = playerPosition[possession * TOTAL_NUMBER_OF_PLAYERS + player * 2 + 1];
+
+
+            // }
+            if (possession == 1) {
+
+            } else if (possession == 1) {
+
+            }
+
+            return (ballPlayer + 1) % 10;
+        }
+
+        // public static int getPassSuccessProb(int ballPlayer)
         // { 
-        
+        //     return playerPassSuccessPassProb[ballPlayer, 0];
         // }
 
-        // //todo
-        // public static double getPassProb()
-        // { 
-        
-        // }
-
-        // //todo
-        // public static double getPassSuccessProb()
-        // { 
-        
+        // public static int getPassFailProb(int[] playerPositions, int ballPlayer, int possession)
+        // {
+        //     return 
         // }
 
         ////////////////////////////
         // Non-movement functions //
         ////////////////////////////
 
-        // can change to non deterministic if needed
-        public static int getBallDeterministic(int team)
+        //deterministic
+        public static int getBall(int[] playerPositions, int team, int possession, int[] ballPosition)
         {
+             if (possession == 7) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("gegetetetetetetetetetetetetn > 1 " + possession + "  " );
+            }
             if (possession == -1)
             {
-                int ballRow = ballPosition[0];
-                int ballCol = ballPosition[1];
-                for (int player = 0; player < playerPosition.GetLength(1); player += 1)
+                for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player += 1)
                 {
-                    if (ballRow == playerPosition[team, player, 0] && ballCol == playerPosition[team, player, 1])
+                    int playerOffsetIdxRow = team * TOTAL_NUMBER_OF_PLAYERS + player * 2;
+                    int playerOffsetIdxCol = playerOffsetIdxRow + 1;
+                    if (ballPosition[0] == playerPositions[playerOffsetIdxRow] && ballPosition[1] == playerPositions[playerOffsetIdxCol])
                     {
-                        possession = team;
-                        ballPlayer = player;
-                        return 1;
+                        if (team > 1) {
+                            throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("Ball is saved. 2");
+                        }
+                        return team;
                     }
                 }
+                return -1;
             }
-            return 1;
+
+            if (possession > 1) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("Ball is saved.");
+            }
+
+            return possession;
+        }
+
+
+        public static int getBallPlayer(int[] playerPositions, int possession, int[] ballPosition)
+        {
+             if (possession == 7) {
+                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("Paw awa" + possession + "  " );
+            }
+            if (possession != -1)
+            {
+                for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player += 1)
+                {
+                    int playerOffsetIdxRow = possession * TOTAL_NUMBER_OF_PLAYERS + player * 2;
+                    int playerOffsetIdxCol = playerOffsetIdxRow + 1;
+                    if (ballPosition[0] == playerPositions[playerOffsetIdxRow] && ballPosition[1] == playerPositions[playerOffsetIdxCol])
+                    {
+                        return player;
+                    }
+                }
+                return -1;
+            }
+            return -1;
         }
     }
 }

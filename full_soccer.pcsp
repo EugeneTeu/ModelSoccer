@@ -38,110 +38,94 @@
 #define RowSize 7;
 #define ColumnSize 9;
 
-var time = 10;
-hvar ballEvent = 0;
-hvar possession = 0; // only used as a temp var to perform OtherAction
+var time = 8;
+var possession = -1; // only used as a temp var to perform OtherAction
+var ballPlayer = -1;
+var ballPosition = [3, 4];
+var playerPosition[2][10][2] = [3, 3, 1, 3, 2, 3, 4, 3, 5, 3, 1, 2, 2, 2, 3, 2, 4, 2, 5, 2, 3, 5, 1, 5, 2, 5, 4, 5, 5, 5, 1, 6, 2, 6, 3, 6, 4, 6, 5, 6];
+
+// private static int[,] goaliePosition = new int[2, 2] { { 3, 1 }, { 3, 7 } };
+
 var scores = [0, 0];
+hvar frozen = false;
 
 //////////////////////
 // Position setting //
 //////////////////////
 
 // To manually set a player position
-//SetPlayerPosition(team, player, row, col) = SetPlayer.team.player { call(setPlayerPosition, team, player, row, col); } -> Skip;
+SetPlayerPosition(team, player, row, col) = SetPlayer.team.player { playerPosition = call(setPlayerPosition, playerPosition, team, player, row, col); } -> Skip;
 
 // To manually set a goalie position
 //SetGoaliePosition(team, row, col) = SetGoalie.team { call(setGoaliePosition, team, row, col); } -> Skip;
 
 // To manually set a ball position
-SetBallPosition(row, col) = SetBall.row.col { call(setBallPosition, row, col); } -> Skip;
+SetBallPosition(row, col) = SetBall.row.col { ballPosition[0] = row; ballPosition[1] = col; } -> Skip;
 
 // To manually set possession of ball
-//SetBallPossession(team) = SetPossession.team { call(setPossession, team); } -> Skip;
+SetBallPossession(team) = SetPossession.team { possession = team; } -> Skip;
 
-//SetBallPlayer(player) = SetBallPlayer.player { call(setBallPlayer, player); } -> Skip; // implement lib
+SetBallPlayer(player) = SetBallP.player { ballPlayer = player; } -> Skip; // implement lib
 
-//SetKickOffPosition(team) = SetBallPosition(3, 4); SetBallPossession(team); SetPlayerPosition(team, 0, 3, 4); SetBallPlayer(0); // continue adding
+SetKickOffPosition(team) = SetBallPosition(3, 4); SetBallPossession(team); SetPlayerPosition(team, 0, 3, 4); SetBallPlayer(0); // continue adding
 
 ////////////////////
 // General action //
 ////////////////////
 
-//DecideFirstPossession() = []possession:{0, 1} @ SetKickOffPosition(possession);
+DecideFirstPossession() = []possess:{0, 1} @ SetKickOffPosition(possess);
 
-//TakeAction() = 
-//    [time > 0] Tick { time--; } -> MoveAction(); OtherAction(); CheckBallEvent()
-//    []
-//    [time <= 0] Skip;
+TakeAction() = 
+    [time > 0] Tick { time--; } -> Unfreeze { frozen = false; } -> MoveAction(); OtherAction(); TakeAction() //CheckBallEvent()
+    []
+    [time <= 0] Skip;
 
 //////////////////////
 // Movement actions //
 //////////////////////
 
-//MoveAction() = move { call(move); } -> Dribble();
-
-//Dribble() = pcase {
-//	call(getDribbleProb): DribbleSuccess { call(dribble); } -> Skip
-//	1: DribbleFail -> SetBallPossession(-1); RetrieveBall()
-//    };
+MoveAction() = move { playerPosition = call(move, playerPosition, possession, ballPosition, ballPlayer); } -> Skip;
 
 ///////////////////
 // Other actions //
 //////////////////
 
-//RetrieveBall() = || team:{0, 1} @ RetrieveBall.team -> GetBall(team);
-//
-//GetBall(team) = GetBall.team { call(getBallDeterministic, team); } -> Skip; // can change to non-deterministic if needed at the end
+RetrieveBall() = |||team:{0, 1} @ Retrieve.team { possession = call(getBall, playerPosition, team, possession, ballPosition); ballPlayer = call(getBallPlayer, playerPosition, possession, ballPosition); } ->  Skip;
 
-//OtherAction() = ||| team:{0, 1} @ OtherAction.team { possession = call(getPossession); } ->
-//	[team == possession] OffensiveAction()
-//	[]
-//	[team != possession && possession != -1] DefensiveAction()
-//	[]
-//	[possession == -1] RetrieveBall();
+OtherAction() = |||team:{0, 1} @ OtherAct.team -> (
+	[!frozen && team == possession] atomic { OffensiveAction() }
+	[]
+	[!frozen && team != possession && possession != -1] atomic { DefensiveAction() }
+	[]
+	[!frozen && possession == -1] atomic { RetrieveBall() }
+	[]
+	[frozen] Skip);
 
-//DefensiveAction() = pcase {
-//	call(getTackleProb): TackleSuccess { call(updateTackle); } -> Skip
-//	1: TackleFail -> Skip
-//	};
-//
-//OffensiveAction() = pcase {
-//	call(getShootProb): Shoot -> Shoot() // change to lib call
-//	call(getPassProb): Pass -> Pass() // change to lib call
-//	1: DoNothing -> Skip
-//	};
-//
-//Shoot() = pcase {
-//	call(getShootSuccessProb): ShootScore -> Skip
-//	1: ShootMiss -> Skip
-//	};
-//
-//Pass() = pcase {
-//	call(getPassSuccessProb): PassSuccess -> Skip
-//	1: PassFail -> Skip
-//	};
+DefensiveAction() = pcase {
+	call(getTackle, playerPosition, ballPosition, possession): TackleSuccess { ballPlayer = call(getTacklePlayer, playerPosition, ballPosition, possession); if(possession == 1) { possession = 0;} else { possession = 1; } } -> Skip
+	call(getDodge, ballPlayer): TackleFail -> Skip
+	};
 
-//    
-//CheckForBallEvent() = updateBallEvent { ballEvent = call(checkBallEvent, ball, 	, ColumnSize)} ->
-//	[ballEvent == 0]
-//	[]
-//	[ballEvent == 1] Goal()
-//	[]
-//	[ballEvent == 2] CornerOrGoalKick();
-//	[]
-//	[ballEvent == 3] changePossession { possession = -1 * possession; } -> ThrowIn(possession);
-//
-//CornerOrGoalKick() = Skip;
-//
-//CornerKick() = Skip;
-//
-//GoalKick() = Skip;
-//
-//Goal() = Skip;
-//
-//ThrowIn(i) = findClosestPlayer.i { team[call(closestPlayer, ball)] = ball; } -> Throw(i) -> fsfsf;
+OffensiveAction() = pcase {
+	call(getShootProb, ballPlayer, ballPosition, possession): ShootAction -> Shoot() // change to lib call
+	call(getPassProb, ballPlayer): PassAction -> Pass() // change to lib call
+	1: Drib -> Dribble() 
+	1: DoNothing -> Skip
+	};
 
-PlayMatch = /* DecideFirstPossession(); */ SetBallPosition(3, 4); /* TakeActionMove(); */
+Dribble() = pcase {
+	call(getDribbleProb, ballPlayer): atomic { DribbleSuccess { playerPosition = call(dribble, playerPosition, possession, ballPlayer); ballPosition = call(getDribbleBall, playerPosition, ballPlayer, possession); } -> Skip }
+	1: DribbleFail { possession = -1; } -> Skip
+    };
+
+Shoot() = pcase {
+	call(getScoreProb, ballPlayer): ShootScore { scores[possession]++; playerPosition = call(resetPlayerPosition); if(possession == 1) { possession = 0;} else { possession = 1; } } -> Freeze { frozen = true; } -> SetKickOffPosition(possession) // need to reset afterwards
+	1: ShootMiss { ballPosition = call(setPassTarget, possession, ballPosition); possession = -1; ballPlayer = -1;  } -> Skip // need to change after
+	};
+
+Pass() = PassSuccess { ballPosition = call(setPassTarget, possession, ballPosition); possession = -1; ballPlayer = -1;  } -> Skip;
+
+PlayMatch = DecideFirstPossession(); TakeAction();
 
 #define FirstTeamWin scores[0] > scores[1] && time <= 0;
 #define SecondTeamWin scores[1] > scores[0] && time <= 0;
