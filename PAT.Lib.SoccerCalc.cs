@@ -49,10 +49,10 @@ namespace PAT.Lib
         private static int[] playerDribbleProb = new int[10] { 10, 10, 10, 9, 9, 9, 9, 9, 8, 8};
 
         // Shoot stuff
-        private static int[] playerShootProb = new int[10] { 5, 5, 5, 4, 4, 4, 4, 3, 3, 3 };
+        // private static int[] playerShootProb = new int[10] { 5, 5, 5, 4, 4, 4, 4, 3, 3, 3 };
 
         // Pass stuff
-        private static int[] playerPassOrKeepProb = new int[10] { { 10, 1 }, { 9, 2 }, { 8, 3 }, { 7, 4 }, { 6, 5 }, { 5, 6 }, { 4, 7 }, { 3, 8 }, { 2, 9 }, { 1, 10 } };
+        // private static int[,] playerPassOrKeepProb = new int[10, 2] { { 10, 1 }, { 9, 2 }, { 8, 3 }, { 7, 4 }, { 6, 5 }, { 5, 6 }, { 4, 7 }, { 3, 8 }, { 2, 9 }, { 1, 10 } };
 
         // Set functions
         public static int setPlayerPosition(int team, int player, int row, int col)
@@ -116,7 +116,7 @@ namespace PAT.Lib
         {
             if (possession != -1)
             {
-                strategicMove()
+                strategicMove();
             }
             else
             {
@@ -248,35 +248,35 @@ namespace PAT.Lib
             return playerDodgeTackleProb[player, action];
         }
 
-        public static double getTackleProb()
-        {
-            int team = 0;
-            if (possession == 0)
-            {
-                team = 1;
-            }
-            int tackler = -1;
-            double ratio = 0;
-            for (int player = 0; player < playerPosition.GetLength(1); player += 1)
-            {
-                if (playerPosition[team, player, 0] != ballPosition[0] || playerPosition[team, player, 1] != ballPosition[1])
-                {
-                    continue;
-                }
-                double calced = (double)getPlayerTackleDodge(player, 1) / (double)getPlayerTackleDodge(ballPlayer, 0);
-                if (calced > ratio)
-                {
-                    ratio = calced;
-                    tackler = player;
-                }
-            }
-            if (tackler == -1)
-            {
-                return 0;
-            }
-            tacklePlayer = tackler;
-            return ratio;
-        }
+        // public static double getTackleProb()
+        // {
+        //     int team = 0;
+        //     if (possession == 0)
+        //     {
+        //         team = 1;
+        //     }
+        //     int tackler = -1;
+        //     double ratio = 0;
+        //     for (int player = 0; player < playerPosition.GetLength(1); player += 1)
+        //     {
+        //         if (playerPosition[team, player, 0] != ballPosition[0] || playerPosition[team, player, 1] != ballPosition[1])
+        //         {
+        //             continue;
+        //         }
+        //         double calced = (double)getPlayerTackleDodge(player, 1) / (double)getPlayerTackleDodge(ballPlayer, 0);
+        //         if (calced > ratio)
+        //         {
+        //             ratio = calced;
+        //             tackler = player;
+        //         }
+        //     }
+        //     if (tackler == -1)
+        //     {
+        //         return 0;
+        //     }
+        //     tacklePlayer = tackler;
+        //     return ratio;
+        // }
 
         public static int updateTackle()
         {
@@ -297,44 +297,44 @@ namespace PAT.Lib
             return playerDribbleProb[ballPlayer];
         }
 
-        public static double getShootProb()
-        {
-            double[] target;
-            if (possession == 0)
-            {
-                target = { 3, 8 };
-            }
-            else
-            {
-                target = { 3, 0 };
-            }
-            double row_diff = target[0] - ballPosition[0];
-            double col_diff = target[1] - ballPosition[1];
-            double distance = Math.Sqrt(row_diff * row_diff + col_diff * col_diff);
-            if (distance > 3)
-            {
-                return 0;
-            }
-            return playerShootProb[ballPlayer] / distance;
-        }
+        // public static double getShootProb()
+        // {
+        //     double[] target;
+        //     if (possession == 0)
+        //     {
+        //         target = { 3, 8 };
+        //     }
+        //     else
+        //     {
+        //         target = { 3, 0 };
+        //     }
+        //     double row_diff = target[0] - ballPosition[0];
+        //     double col_diff = target[1] - ballPosition[1];
+        //     double distance = Math.Sqrt(row_diff * row_diff + col_diff * col_diff);
+        //     if (distance > 3)
+        //     {
+        //         return 0;
+        //     }
+        //     return playerShootProb[ballPlayer] / distance;
+        // }
 
-        //todo
-        public static double getShootSuccessProb()
-        { 
+        // //todo
+        // public static double getShootSuccessProb()
+        // { 
         
-        }
+        // }
 
-        //todo
-        public static double getPassProb()
-        { 
+        // //todo
+        // public static double getPassProb()
+        // { 
         
-        }
+        // }
 
-        //todo
-        public static double getPassSuccessProb()
-        { 
+        // //todo
+        // public static double getPassSuccessProb()
+        // { 
         
-        }
+        // }
 
         ////////////////////////////
         // Non-movement functions //
