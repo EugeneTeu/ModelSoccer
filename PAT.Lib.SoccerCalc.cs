@@ -23,11 +23,22 @@ namespace PAT.Lib
         // for book keeping
         public static Random rand = new Random();
 
+        public static int NUMBER_OF_DIMENSIONS = 2;
+
         public const int NUMBER_OF_TEAMS = 2;
 
         public const int NUMBER_OF_PLAYERS_PER_TEAM = 10;
 
-        public const int TOTAL_NUMBER_OF_PLAYERS = NUMBER_OF_TEAMS * NUMBER_OF_PLAYERS_PER_TEAM;
+        public static int TOTAL_NUMBER_OF_PLAYERS = NUMBER_OF_TEAMS * NUMBER_OF_PLAYERS_PER_TEAM;
+
+        public const int NUMBER_OF_ACTIONS = 7;
+        public static int DODGE = 0;
+        public static int TACKLE = 1;
+        public static int DRIBBLE = 2;
+        public static int SHOOT = 3;
+        public static int OUT_OF_BOUNDS = 4;
+        public static int SCORE = 5;
+        public static int PASS = 6;
         
         // public static int[,,] originalPlayerPosition = new int[2, 10, 2] { { { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 }, { 3, 3 } },
         //     { { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 }, { 3, 5 } } };
@@ -38,25 +49,198 @@ namespace PAT.Lib
         ///////////////////
         // Probabilities //
         ///////////////////
-        
-        // Tackle stuff
-        public static int[,] playerDodgeTackleProb = new int[10, 2] { { 10, 1 }, { 10, 1 }, { 10, 1 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 5, 5 }, { 1, 10 }, { 1, 10 }, { 1, 10 } };
 
-        // Dribble stuff
-        public static int[] playerDribbleProb = new int[10] { 10, 10, 10, 9, 9, 9, 9, 9, 8, 8};
-
-        // Shoot stuff
-        public static int[] playerShootProb = new int[10] { 6, 6, 6, 4, 4, 4, 4, 3, 3, 3 };
-
-        public static int[] playerScoreProb = new int[10] { 4, 3, 3, 2, 2, 2, 2, 1, 1, 1};
-
-        // Pass stuff
-        public static int[] playerPassProb = new int[10] { 1, 1, 1, 2, 2, 2, 2, 3, 3, 3 };
+        public static int[,,] playerProbabilities = new int[NUMBER_OF_TEAMS, NUMBER_OF_PLAYERS_PER_TEAM, NUMBER_OF_ACTIONS] {
+            { // Team 0
+                { // Player 0 - striker
+                    10, // DodgeProb
+                    1, // TackleProb
+                    10, // DribbleProb
+                    6, // ShootProb
+                    1, // OutOfBoundsProb
+                    5, // ScoreProb
+                    1 // PassProb
+                },
+                { // Player 1 - striker
+                    10, // DodgeProb
+                    1, // TackleProb
+                    10, // DribbleProb
+                    6, // ShootProb
+                    1, // OutOfBoundsProb
+                    5, // ScoreProb
+                    1 // PassProb
+                },
+                { // Player 2 - striker
+                    10, // DodgeProb
+                    1, // TackleProb
+                    10, // DribbleProb
+                    6, // ShootProb
+                    1, // OutOfBoundsProb
+                    5, // ScoreProb
+                    1 // PassProb
+                },
+                { // Player 3 - midfielder
+                    5, // DodgeProb
+                    5, // TackleProb
+                    8, // DribbleProb
+                    4, // ShootProb
+                    2, // OutOfBoundsProb
+                    2, // ScoreProb
+                    2 // PassProb
+                },
+                { // Player 4 - midfielder
+                    5, // DodgeProb
+                    5, // TackleProb
+                    8, // DribbleProb
+                    4, // ShootProb
+                    2, // OutOfBoundsProb
+                    2, // ScoreProb
+                    2 // PassProb
+                },
+                { // Player 5 - midfielder
+                    5, // DodgeProb
+                    5, // TackleProb
+                    8, // DribbleProb
+                    4, // ShootProb
+                    2, // OutOfBoundsProb
+                    2, // ScoreProb
+                    2 // PassProb
+                },
+                { // Player 6 - defender
+                    1, // DodgeProb
+                    10, // TackleProb
+                    6, // DribbleProb
+                    2, // ShootProb
+                    3, // OutOfBoundsProb
+                    1, // ScoreProb
+                    3 // PassProb
+                },
+                { // Player 7 - defender
+                    1, // DodgeProb
+                    10, // TackleProb
+                    6, // DribbleProb
+                    2, // ShootProb
+                    3, // OutOfBoundsProb
+                    1, // ScoreProb
+                    3 // PassProb
+                },
+                { // Player 8 - defender
+                    1, // DodgeProb
+                    10, // TackleProb
+                    6, // DribbleProb
+                    2, // ShootProb
+                    3, // OutOfBoundsProb
+                    1, // ScoreProb
+                    3 // PassProb
+                },
+                { // Player 9 - defender
+                    1, // DodgeProb
+                    10, // TackleProb
+                    6, // DribbleProb
+                    2, // ShootProb
+                    3, // OutOfBoundsProb
+                    1, // ScoreProb
+                    3 // PassProb
+                }
+            },
+            { // Team 1
+                { // Player 0 - striker
+                    10, // DodgeProb
+                    1, // TackleProb
+                    10, // DribbleProb
+                    6, // ShootProb
+                    1, // OutOfBoundsProb
+                    5, // ScoreProb
+                    1 // PassProb
+                },
+                { // Player 1 - striker
+                    10, // DodgeProb
+                    1, // TackleProb
+                    10, // DribbleProb
+                    6, // ShootProb
+                    1, // OutOfBoundsProb
+                    5, // ScoreProb
+                    1 // PassProb
+                },
+                { // Player 2 - striker
+                    10, // DodgeProb
+                    1, // TackleProb
+                    10, // DribbleProb
+                    6, // ShootProb
+                    1, // OutOfBoundsProb
+                    5, // ScoreProb
+                    1 // PassProb
+                },
+                { // Player 3 - midfielder
+                    5, // DodgeProb
+                    5, // TackleProb
+                    8, // DribbleProb
+                    4, // ShootProb
+                    2, // OutOfBoundsProb
+                    2, // ScoreProb
+                    2 // PassProb
+                },
+                { // Player 4 - midfielder
+                    5, // DodgeProb
+                    5, // TackleProb
+                    8, // DribbleProb
+                    4, // ShootProb
+                    2, // OutOfBoundsProb
+                    2, // ScoreProb
+                    2 // PassProb
+                },
+                { // Player 5 - midfielder
+                    5, // DodgeProb
+                    5, // TackleProb
+                    8, // DribbleProb
+                    4, // ShootProb
+                    2, // OutOfBoundsProb
+                    2, // ScoreProb
+                    2 // PassProb
+                },
+                { // Player 6 - defender
+                    1, // DodgeProb
+                    10, // TackleProb
+                    6, // DribbleProb
+                    2, // ShootProb
+                    3, // OutOfBoundsProb
+                    1, // ScoreProb
+                    3 // PassProb
+                },
+                { // Player 7 - defender
+                    1, // DodgeProb
+                    10, // TackleProb
+                    6, // DribbleProb
+                    2, // ShootProb
+                    3, // OutOfBoundsProb
+                    1, // ScoreProb
+                    3 // PassProb
+                },
+                { // Player 8 - defender
+                    1, // DodgeProb
+                    10, // TackleProb
+                    6, // DribbleProb
+                    2, // ShootProb
+                    3, // OutOfBoundsProb
+                    1, // ScoreProb
+                    3 // PassProb
+                },
+                { // Player 9 - defender
+                    1, // DodgeProb
+                    10, // TackleProb
+                    6, // DribbleProb
+                    2, // ShootProb
+                    3, // OutOfBoundsProb
+                    1, // ScoreProb
+                    3 // PassProb
+                }
+            }
+        };
 
         // Set functions
         public static int[] setPlayerPosition(int[] playerPositions, int team, int player, int row, int col)
         {
-            int position = team * 20 + player;
+            int position = team * TOTAL_NUMBER_OF_PLAYERS + player * 2;
             playerPositions[position] = row;
             playerPositions[position + 1] = col;
             return playerPositions;
@@ -94,37 +278,38 @@ namespace PAT.Lib
                     if (possession == team && player == ballPlayer)
                     {
                         continue;
-                    }
-                    int playerOffsetIdxRow = team * TOTAL_NUMBER_OF_PLAYERS + player * 2;
-                    int playerOffsetIdxCol = playerOffsetIdxRow + 1;
-                    int chance = rand.Next(0, 3);
-                    // TODO: Check deterministic or probabilistic
-                    
-                    // 33 % to move diagonally towards goal
-                    if (chance == 2)
-                    {
-                        int row = playerPositions[playerOffsetIdxRow];
-                        if (row < 3)
+                    } else {
+                        int playerOffsetIdxRow = team * TOTAL_NUMBER_OF_PLAYERS + player * 2;
+                        int playerOffsetIdxCol = playerOffsetIdxRow + 1;
+                        int chance = rand.Next(0, 3);
+                        // TODO: Check deterministic or probabilistic
+                        
+                        // 33 % to move diagonally towards goal
+                        if (chance == 2)
                         {
-                            playerPositions[playerOffsetIdxRow] += 1;
+                            int row = playerPositions[playerOffsetIdxRow];
+                            if (row < 3)
+                            {
+                                playerPositions[playerOffsetIdxRow] += 1;
+                            }
+                            else if (row > 3)
+                            {
+                                playerPositions[playerOffsetIdxRow] -= 1;
+                            }
                         }
-                        else if (row > 3)
-                        {
-                            playerPositions[playerOffsetIdxRow] -= 1;
-                        }
-                    }
 
-                    // Determine direction to attack
-                    int direction = possession == 0 ? 1 : -1;
-                    playerPositions[playerOffsetIdxCol] += direction;
-                    // account for bounds
-                    if (playerPositions[playerOffsetIdxCol] < 1)
-                    {
-                        playerPositions[playerOffsetIdxCol] = 1;
-                    }
-                    else if (playerPositions[playerOffsetIdxCol] > 7)
-                    {
-                        playerPositions[playerOffsetIdxCol] = 7;
+                        // Determine direction to attack
+                        int direction = possession == 0 ? 1 : -1;
+                        playerPositions[playerOffsetIdxCol] += direction;
+                        // account for bounds
+                        if (playerPositions[playerOffsetIdxCol] < 1)
+                        {
+                            playerPositions[playerOffsetIdxCol] = 1;
+                        }
+                        else if (playerPositions[playerOffsetIdxCol] > 7)
+                        {
+                            playerPositions[playerOffsetIdxCol] = 7;
+                        }
                     }
                 }
             }
@@ -170,20 +355,6 @@ namespace PAT.Lib
         {
             int playerOffsetIdxRow = (possession * TOTAL_NUMBER_OF_PLAYERS) + (ballPlayer * 2);
             int playerOffsetIdxCol = playerOffsetIdxRow + 1;
-            if (possession == 7) {
-                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("Possession > 1 " + possession + "  ");
-            }
-            if (ballPlayer < 0) {
-                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("BallPlayer < 0");
-            }
-
-            if (playerOffsetIdxRow < 0) {
-                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("Access an empty stack!");
-            }
-            if (playerOffsetIdxRow > 39) {
-                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("Access an empty stack! 2 playerOffsetIdxRow: " + playerOffsetIdxRow);
-            }
-
             int row = playerPositions[playerOffsetIdxRow];
             if (row < 3)
             {
@@ -211,9 +382,6 @@ namespace PAT.Lib
 
         public static int[] getDribbleBall(int[] playerPositions, int ballPlayer, int possession)
         {
-             if (possession == 7) {
-                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("getDba " + possession + "  ");
-            }
             int[] positionBall = new int[2];
             int playerOffsetIdxRow = possession * TOTAL_NUMBER_OF_PLAYERS + ballPlayer * 2;
             int playerOffsetIdxCol = playerOffsetIdxRow + 1;
@@ -236,21 +404,21 @@ namespace PAT.Lib
         //     return playerDodgeTackleProb[player, action];
         // }
 
-        public static int getDodge(int ballPlayer)
+        public static int getDodgeProb(int team, int player)
         {
-            return playerDodgeTackleProb[ballPlayer, 0];
+            return playerProbabilities[team, player, DODGE];
         }
 
-        public static int getTackle(int[] playerPositions, int[] ballPosition, int possession)
+        public static int getTackleProb(int[] playerPositions, int[] ballPosition, int possession)
         {
-             if (possession == 7) {
-                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("tavklrs" + possession + "  ");
-            }
+            // If the ball does not belong to either team, tackling makes no sense
             if (possession == -1) {
                 return 0;
             }
 
+            // We are only interested in the defending team
             int team = possession == 0 ? 1 : 0;
+
             int best = -1;
             for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player += 1)
             {
@@ -261,7 +429,7 @@ namespace PAT.Lib
                     continue;
                 }
 
-                int ratio = playerDodgeTackleProb[player, 1];
+                int ratio = playerProbabilities[team, player, TACKLE];
                 if (ratio > best)
                 {
                     best = ratio;
@@ -275,14 +443,14 @@ namespace PAT.Lib
 
         public static int getTacklePlayer(int[] playerPositions, int[] ballPosition, int possession)
         {
-             if (possession == 7) {
-                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("getetate > 1 " + possession + "  " );
-            }
+            // If the ball does not belong to either team, tackling makes no sense
             if (possession == -1) {
                 return 0;
             }
 
+            // We are only interested in the defending team
             int team = possession == 0 ? 1 : 0;
+
             int best = -1;
             int bestPlayer = -1;
             for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player += 1)
@@ -294,7 +462,7 @@ namespace PAT.Lib
                     continue;
                 }
 
-                int ratio = playerDodgeTackleProb[player, 1];
+                int ratio = playerProbabilities[team, player, TACKLE];
                 if (ratio > best)
                 {
                     best = ratio;
@@ -322,17 +490,14 @@ namespace PAT.Lib
         //     return 1;
         // }
 
-        public static int getDribbleProb(int ballPlayer)
+        public static int getDribbleProb(int team, int player)
         {
-            return playerDribbleProb[ballPlayer];
+            return playerProbabilities[team, player, DRIBBLE];
         }
 
-        public static int getShootProb(int ballPlayer, int[] ballPosition, int possession) {
-             if (possession == 7) {
-                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("Possession >asdasdadadadaads 1 " + possession + "  ");
-            }
-            int target;
-            target = possession == 0 ? 8 : 0;
+        public static int getShootProb(int team, int player, int[] ballPosition) {
+            
+            int target = team == 0 ? 8 : 0;
             int col_diff = -1;
             if (target == 8)
             {
@@ -357,14 +522,18 @@ namespace PAT.Lib
             {
                 row_diff = 4 - ballPosition[0];
             }
-            int shootProb = playerShootProb[ballPlayer] / row_diff - (col_diff - 1);
-            return shootProb;
-        
+
+            int shootProb = playerProbabilities[team, player, SHOOT] / row_diff - (col_diff - 1);
+            if (shootProb < 0) {
+                return shootProb * -1;
+            } else {
+                return shootProb;
+            }
         }
 
-        public static int getScoreProb(int ballPlayer) 
+        public static int getScoreProb(int team, int player) 
         {
-            return playerScoreProb[ballPlayer];
+            return playerProbabilities[team, player, SCORE];
         }
 
         public static int[] resetPlayerPosition() 
@@ -393,9 +562,9 @@ namespace PAT.Lib
         //     return playerShootProb[ballPlayer] / distance;
         // }
 
-        public static int getPassProb(int ballPlayer) 
+        public static int getPassProb(int team, int player) 
         {
-            return playerPassProb[ballPlayer];
+            return playerProbabilities[team, player, PASS];
         }
 
         public static int[] setPassTarget(int possession,  int[] ballPosition) {
@@ -451,9 +620,7 @@ namespace PAT.Lib
         //deterministic
         public static int getBall(int[] playerPositions, int team, int possession, int[] ballPosition)
         {
-             if (possession == 7) {
-                throw new PAT.Common.Classes.Expressions.ExpressionClass.RuntimeException("gegetetetetetetetetetetetetn > 1 " + possession + "  " );
-            }
+           
             if (possession == -1)
             {
                 for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player += 1)
@@ -498,6 +665,27 @@ namespace PAT.Lib
                 return -1;
             }
             return -1;
+        }
+
+        public static int getOutOfBoundProb(int team, int player) {
+            return playerProbabilities[team, player, OUT_OF_BOUNDS];
+        }
+
+        public static int[] setOutOfBoundThenThrowIn(int[] ballPosition) {
+            int currBallRow = ballPosition[0];
+            if (currBallRow < 3) {
+                ballPosition[0] = 1; // skip throw in action
+            } else if (currBallRow > 3) {
+                ballPosition[0] = 5; 
+            } else {
+                int chanceToGoUpOrDown = rand.Next(0,1);
+                if (chanceToGoUpOrDown == 1) {
+                     ballPosition[0] = 1;
+                } else {
+                    ballPosition[0] = 5; 
+                }
+            }
+            return ballPosition;
         }
     }
 }
