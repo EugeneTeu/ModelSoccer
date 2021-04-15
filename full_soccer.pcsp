@@ -45,7 +45,7 @@
 
 hvar formation = 433;
 hvar frozen = false;
-var time = 6;
+var time = 7;
 var scores[NUMBER_OF_TEAMS] = [0, 0];
 var possession = -1;
 var ballPlayer = -1;
@@ -139,12 +139,12 @@ PlayMatch() = DecideFirstPossession(); SetKickOffPosition(possession); TakeActio
 #define SecondTeamWin scores[1] > scores[0] && time <= 0;
 #define Draw scores[0] == scores[1] && time <= 0;
 
-#assert PlayMatch() reaches FirstTeamWin;
-#assert PlayMatch() reaches SecondTeamWin;
-#assert PlayMatch() reaches Draw;
+//#assert PlayMatch() reaches FirstTeamWin;
+//#assert PlayMatch() reaches SecondTeamWin;
+//#assert PlayMatch() reaches Draw;
 
 #assert PlayMatch() reaches FirstTeamWin with prob;
 #assert PlayMatch() reaches SecondTeamWin with prob;
 #assert PlayMatch() reaches Draw with prob;
 
-#assert PlayMatch() deadlockfree;
+//#assert PlayMatch() deadlockfree;
