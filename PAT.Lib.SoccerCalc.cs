@@ -49,6 +49,8 @@ namespace PAT.Lib
         private const int DODGE = 0;
         private const int TACKLE = 1;
 
+        private const double DODGE_PROBABILITY = 0.5;
+
         // 4-3-3
         private static int[] FORMATION_4_3_3 = new int[TOTAL_NUMBER_OF_PLAYERS * NUMBER_OF_DIMENSIONS] {
             // Team 0
@@ -212,7 +214,7 @@ namespace PAT.Lib
             }
         };
 
-        private static int[,,] DEFENSIVE_STATS = new int[NUMBER_OF_TEAMS, NUMBER_OF_PLAYERS_PER_TEAM, NUMBER_OF_OFFENSIVE_STATS] {
+        private static int[,,] DEFENSIVE_STATS = new int[NUMBER_OF_TEAMS, NUMBER_OF_PLAYERS_PER_TEAM, 1] {
             { // Team 0 - Manchester City
                 { // Player 0 - Sterling
                     50
@@ -278,7 +280,6 @@ namespace PAT.Lib
                 }
             }
         };
-
 
         public static int[,,] PLAYER_PROBABILITIES = new int[NUMBER_OF_TEAMS, NUMBER_OF_PLAYERS_PER_TEAM, NUMBER_OF_PROBABILITIES] {
             { // Team 0
@@ -576,50 +577,19 @@ namespace PAT.Lib
 
         public static int getDodgeProb(int team, int player)
         {
-            return PLAYER_PROBABILITIES[team, player, DODGE];
+            //return PLAYER_PROBABILITIES[team, player, DODGE];
+            return 100;
         }
 
-        public static int getTackleProb(int[] playerPositions, int[] ballPosition, int possession)
+        public static int[] tackle(int[] playerPositions, int[] ballPosition, int possession, int ballPlayer)
         {
-            // If the ball does not belong to either team, tackling makes no sense
-            if (possession == -1) {
-                return 0;
-            }
-
             // We are only interested in the defending team
             int team = possession == 0 ? 1 : 0;
 
-            int best = -1;
-            for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player += 1)
-            {
-                int playerOffsetIdxRow = team * TOTAL_NUMBER_OF_PLAYERS + player * 2;
-                int playerOffsetIdxCol = playerOffsetIdxRow + 1;
-                if (playerPositions[playerOffsetIdxRow] != ballPosition[0] || playerPositions[playerOffsetIdxCol] != ballPosition[1])
-                {
-                    continue;
-                }
+            int[] result = { 0, 0 };
+            result[0] = team;
+            result[1] = ballPlayer;
 
-                int ratio = PLAYER_PROBABILITIES[team, player, TACKLE];
-                if (ratio > best)
-                {
-                    best = ratio;
-                }
-            }
-            if (best == -1) {
-                return 0;
-            }
-            return best;
-        }
-
-        public static int getTacklePlayer(int[] playerPositions, int[] ballPosition, int possession)
-        {
-            // If the ball does not belong to either team, tackling makes no sense
-            if (possession == -1) {
-                return 0;
-            }
-
-            // We are only interested in the defending team
-            int team = possession == 0 ? 1 : 0;
 
             int best = -1;
             int bestPlayer = -1;
@@ -632,17 +602,32 @@ namespace PAT.Lib
                     continue;
                 }
 
-                int ratio = PLAYER_PROBABILITIES[team, player, TACKLE];
+                int ratio = DEFENSIVE_STATS[team, player, 0];
+
                 if (ratio > best)
                 {
                     best = ratio;
                     bestPlayer = player;
                 }
             }
-            if (best == -1) {
-                return 0;
+            if (best == -1)
+            {
+                return result;
             }
-            return bestPlayer;
+
+            bool tackleSuccess = rand.Next(1, 101) < (double) best * DODGE_PROBABILITY;
+            if (tackleSuccess) {
+                if (team == 0) {
+                    result[0] = 1;
+                }
+                else
+                {
+                    result[0] = 0;
+                }
+                result[1] = bestPlayer;
+            }
+
+            return result;
         }
 
         private static double getShootProb(int team, int[] ballPosition) {
