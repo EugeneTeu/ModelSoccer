@@ -31,23 +31,18 @@ namespace PAT.Lib
         private const int MAX_COL = 7;
 
         private const int NUMBER_OF_TEAMS = 2;
-
         private const int NUMBER_OF_PLAYERS_PER_TEAM = 10;
-
         private const int TOTAL_NUMBER_OF_PLAYERS = NUMBER_OF_TEAMS * NUMBER_OF_PLAYERS_PER_TEAM;
 
         private const int PRECISION_FACTOR = 1000000;
 
         private const int NUMBER_OF_OFFENSIVE_ACTIONS = 3;
-        private const int NUMBER_OF_OFFENSIVE_STATS = 3;
         private const int SHOTS = 0;
         private const int GOALS = 1;
         private const int SHOTS_ON_TARGET = 2;
 
-        private const int NUMBER_OF_PROBABILITIES = 2;
-
-        private const int DODGE = 0;
-        private const int TACKLE = 1;
+        private const int NUMBER_OF_DEFENSIVE_ACTIONS = 1;
+        private const int TACKLE = 0;
 
         private const double DODGE_PROBABILITY = 0.5;
 
@@ -107,7 +102,7 @@ namespace PAT.Lib
         // Probabilities //
         ///////////////////
 
-        private static int[,,] OFFENSIVE_STATS = new int[NUMBER_OF_TEAMS, NUMBER_OF_PLAYERS_PER_TEAM, NUMBER_OF_OFFENSIVE_STATS] {
+        private static int[,,] OFFENSIVE_STATS = new int[NUMBER_OF_TEAMS, NUMBER_OF_PLAYERS_PER_TEAM, NUMBER_OF_OFFENSIVE_ACTIONS] {
             { // Team 0 - Manchester City
                 { // Player 0 - Sterling
                     602, // Shots
@@ -214,7 +209,7 @@ namespace PAT.Lib
             }
         };
 
-        private static int[,,] DEFENSIVE_STATS = new int[NUMBER_OF_TEAMS, NUMBER_OF_PLAYERS_PER_TEAM, 1] {
+        private static int[,,] DEFENSIVE_STATS = new int[NUMBER_OF_TEAMS, NUMBER_OF_PLAYERS_PER_TEAM, NUMBER_OF_DEFENSIVE_ACTIONS] {
             { // Team 0 - Manchester City
                 { // Player 0 - Sterling
                     50
@@ -279,94 +274,7 @@ namespace PAT.Lib
                     64
                 }
             }
-        };
-
-        public static int[,,] PLAYER_PROBABILITIES = new int[NUMBER_OF_TEAMS, NUMBER_OF_PLAYERS_PER_TEAM, NUMBER_OF_PROBABILITIES] {
-            { // Team 0
-                { // Player 0
-                    10, // DodgeProb
-                    1, // TackleProb
-                },
-                { // Player 1
-                    10, // DodgeProb
-                    1, // TackleProb
-                },
-                { // Player 2
-                    10, // DodgeProb
-                    1, // TackleProb
-                },
-                { // Player 3
-                    5, // DodgeProb
-                    5, // TackleProb
-                },
-                { // Player 4
-                    5, // DodgeProb
-                    5, // TackleProb
-                },
-                { // Player 5
-                    5, // DodgeProb
-                    5, // TackleProb
-                },
-                { // Player 6
-                    1, // DodgeProb
-                    10, // TackleProb
-                },
-                { // Player 7
-                    1, // DodgeProb
-                    10, // TackleProb
-                },
-                { // Player 8
-                    1, // DodgeProb
-                    10, // TackleProb
-                },
-                { // Player 9
-                    1, // DodgeProb
-                    10, // TackleProb
-                }
-            },
-            { // Team 1
-                { // Player 0
-                    10, // DodgeProb
-                    1, // TackleProb
-                },
-                { // Player 1
-                    10, // DodgeProb
-                    1, // TackleProb
-                },
-                { // Player 2
-                    10, // DodgeProb
-                    1, // TackleProb
-                },
-                { // Player 3
-                    5, // DodgeProb
-                    5, // TackleProb
-                },
-                { // Player 4
-                    5, // DodgeProb
-                    5, // TackleProb
-                },
-                { // Player 5
-                    5, // DodgeProb
-                    5, // TackleProb
-                },
-                { // Player 6
-                    1, // DodgeProb
-                    10, // TackleProb
-                },
-                { // Player 7
-                    1, // DodgeProb
-                    10, // TackleProb
-                },
-                { // Player 8
-                    1, // DodgeProb
-                    10, // TackleProb
-                },
-                { // Player 9
-                    1, // DodgeProb
-                    10, // TackleProb
-                }
-            }
-        };
+        };          
 
         ////////////////////////
         //  Helper functions  //
@@ -483,7 +391,7 @@ namespace PAT.Lib
             }
         }
 
-        public static int[] strategicMove(int[] playerPositions, int possession, int ballPlayer)
+        private static int[] strategicMove(int[] playerPositions, int possession, int ballPlayer)
         {
             if (possession == 0) {
                 moveTowardsOwnGoal(playerPositions, 1);
@@ -496,7 +404,7 @@ namespace PAT.Lib
             return playerPositions;
         }
 
-        public static int[] runToBall(int[] playerPositions, int[] ballPosition)
+        private static int[] runToBall(int[] playerPositions, int[] ballPosition)
         {
             for (int team = 0; team < NUMBER_OF_TEAMS; team++)
             {
@@ -575,59 +483,48 @@ namespace PAT.Lib
             };
         }
 
-        public static int getDodgeProb(int team, int player)
-        {
-            //return PLAYER_PROBABILITIES[team, player, DODGE];
-            return 100;
-        }
-
         public static int[] tackle(int[] playerPositions, int[] ballPosition, int possession, int ballPlayer)
         {
             // We are only interested in the defending team
-            int team = possession == 0 ? 1 : 0;
+            int opposingTeam = possession == 0 ? 1 : 0;
 
-            int[] result = { 0, 0 };
-            result[0] = team;
-            result[1] = ballPlayer;
+            int[] result = { possession, ballPlayer };
 
+            int bestTackleProbSoFar = Int32.MinValue;
+            int tacklingPlayerSoFar = -1;
 
-            int best = -1;
-            int bestPlayer = -1;
-            for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player += 1)
+            for (int player = 0; player < NUMBER_OF_PLAYERS_PER_TEAM; player ++)
             {
-                int playerOffsetIdxRow = team * TOTAL_NUMBER_OF_PLAYERS + player * 2;
-                int playerOffsetIdxCol = playerOffsetIdxRow + 1;
-                if (playerPositions[playerOffsetIdxRow] != ballPosition[0] || playerPositions[playerOffsetIdxCol] != ballPosition[1])
+                int playerRowIdx = getPlayerRowIdx(opposingTeam, player);
+                int playerColIdx = getPlayerColIdx(opposingTeam, player);
+
+                // If player is not at the same position, can't tackle
+                if (playerPositions[playerRowIdx] != ballPosition[0] || playerPositions[playerColIdx] != ballPosition[1])
                 {
                     continue;
                 }
 
-                int ratio = DEFENSIVE_STATS[team, player, 0];
+                int tackleProbability = DEFENSIVE_STATS[opposingTeam, player, TACKLE];
 
-                if (ratio > best)
+                if (tackleProbability > bestTackleProbSoFar)
                 {
-                    best = ratio;
-                    bestPlayer = player;
+                    bestTackleProbSoFar = tackleProbability;
+                    tacklingPlayerSoFar = player;
                 }
             }
-            if (best == -1)
+
+            if (tacklingPlayerSoFar == -1)
             {
-                return result;
+                return new int[] { possession, ballPlayer };
             }
 
-            bool tackleSuccess = rand.Next(1, 101) < (double) best * DODGE_PROBABILITY;
-            if (tackleSuccess) {
-                if (team == 0) {
-                    result[0] = 1;
-                }
-                else
-                {
-                    result[0] = 0;
-                }
-                result[1] = bestPlayer;
+            bool tackleSuccess = rand.Next(1, 101) < (double)bestTackleProbSoFar * DODGE_PROBABILITY;
+
+            if (!tackleSuccess) {
+                return new int[] { possession, ballPlayer };
             }
 
-            return result;
+            return new int[] { (possession + 1) % 2, tacklingPlayerSoFar };
         }
 
         private static double getShootProb(int team, int[] ballPosition) {
@@ -670,7 +567,7 @@ namespace PAT.Lib
             return Convert.ToInt32((double)(OFFENSIVE_STATS[team, player, SHOTS_ON_TARGET] - OFFENSIVE_STATS[team, player, GOALS]) / (double)OFFENSIVE_STATS[team, player, SHOTS] * PRECISION_FACTOR);
         }
 
-        public static double getPassProb(int possession, int[] ballPosition, int[] playerPositions) 
+        private static double getPassProb(int possession, int[] ballPosition, int[] playerPositions) 
         {
             // Pass probability is dependent on the number of opposing players at the same position - the more players, the higher
             int opposingTeam = (possession + 1) % 2;
@@ -736,24 +633,6 @@ namespace PAT.Lib
                 }
             }
             return new int[2]{ -1, -1 };
-        }
-
-        public static int[] setOutOfBoundThenThrowIn(int[] ballPosition) {
-            int ballRow = ballPosition[0];
-
-            if (ballRow < 3) {
-                ballPosition[0] = MIN_ROW; // skip throw in action
-            } else if (ballRow > 3) {
-                ballPosition[0] = MAX_ROW;
-            } else {
-                bool goUp = rand.Next(0,1) == 0;
-                if (goUp) {
-                    ballPosition[0] = MIN_ROW;
-                } else {
-                    ballPosition[0] = MAX_ROW; 
-                }
-            }
-            return ballPosition;
         }
 
         public static int[] getFormation(int code) {

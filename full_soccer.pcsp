@@ -131,7 +131,7 @@ _Shoot() = pcase {
 	call(getMissProb, possession, ballPlayer): Miss { ballPosition = call(setPassTarget, possession, ballPosition); possession = -1; ballPlayer = -1; } -> Skip
 };
 
-_Pass() = Pass { ballPosition = call(setPassTarget, possession, ballPosition); possession = -1; ballPlayer = -1; } -> Skip;
+_Pass() = tau { ballPosition = call(setPassTarget, possession, ballPosition); possession = -1; ballPlayer = -1; } -> Skip;
 
 PlayMatch() = DecideFirstPossession(); SetKickOffPosition(possession); TakeAction();
 

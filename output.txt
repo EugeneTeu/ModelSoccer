@@ -1,0 +1,570 @@
+﻿*******************************************************
+*C:\Users\YWL-HP\Desktop\ModelSoccer\full_soccer.pcsp
+**************************START************************
+=======================================================
+Assertion: PlayMatch() reaches FirstTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches FirstTeamWin with prob) is Valid with Probability [0, 0.0817];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4743099
+Total Transitions:5324558
+MDP Iterations:2573722
+Time Used:59.5978436s
+Estimated Memory Used:2889702.656KB
+
+=======================================================
+Assertion: PlayMatch() reaches SecondTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches SecondTeamWin with prob) is Valid with Probability [0, 0.11835];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:5109997
+Total Transitions:5734876
+MDP Iterations:2733474
+Time Used:58.9251325s
+Estimated Memory Used:3392614.144KB
+
+=======================================================
+Assertion: PlayMatch() reaches Draw with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches Draw with prob) is Valid with Probability [0.87273, 1];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:1904173
+Total Transitions:2129096
+MDP Iterations:3151527
+Time Used:25.1155186s
+Estimated Memory Used:1325976.192KB
+
+*******************************************************
+*C:\Users\YWL-HP\Desktop\ModelSoccer\full_soccer.pcsp
+**************************START************************
+=======================================================
+Assertion: PlayMatch() reaches FirstTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches FirstTeamWin with prob) is Valid with Probability [0, 0.13335];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4364654
+Total Transitions:4900249
+MDP Iterations:2342812
+Time Used:50.9191589s
+Estimated Memory Used:2665262.08KB
+
+=======================================================
+Assertion: PlayMatch() reaches SecondTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches SecondTeamWin with prob) is Valid with Probability [0, 0.08951];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:5111646
+Total Transitions:5737705
+MDP Iterations:2845410
+Time Used:61.7376776s
+Estimated Memory Used:3431480.576KB
+
+=======================================================
+Assertion: PlayMatch() reaches Draw with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches Draw with prob) is Valid with Probability [0.91512, 1];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:2120152
+Total Transitions:2369965
+MDP Iterations:3356540
+Time Used:26.4055068s
+Estimated Memory Used:1418370.688KB
+
+*******************************************************
+*C:\Users\YWL-HP\Desktop\ModelSoccer\full_soccer.pcsp
+**************************START************************
+=======================================================
+Assertion: PlayMatch() reaches FirstTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches FirstTeamWin with prob) is Valid with Probability [0, 0.11864];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4463282
+Total Transitions:5015207
+MDP Iterations:2490029
+Time Used:52.146522s
+Estimated Memory Used:2771214.592KB
+
+=======================================================
+Assertion: PlayMatch() reaches SecondTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches SecondTeamWin with prob) is Valid with Probability [0, 0.06525];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4616597
+Total Transitions:5177525
+MDP Iterations:2436362
+Time Used:53.4069934s
+Estimated Memory Used:2805593.856KB
+
+=======================================================
+Assertion: PlayMatch() reaches Draw with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches Draw with prob) is Valid with Probability [0.88553, 0.99636];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:1960160
+Total Transitions:2192819
+MDP Iterations:2952748
+Time Used:25.434825s
+Estimated Memory Used:1351093.12KB
+
+*******************************************************
+*C:\Users\YWL-HP\Desktop\ModelSoccer\full_soccer.pcsp
+**************************START************************
+=======================================================
+Assertion: PlayMatch() reaches FirstTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches FirstTeamWin with prob) is Valid with Probability [0, 0.21032];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4294301
+Total Transitions:4819787
+MDP Iterations:2344486
+Time Used:49.2804354s
+Estimated Memory Used:2635897.344KB
+
+=======================================================
+Assertion: PlayMatch() reaches SecondTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches SecondTeamWin with prob) is Valid with Probability [0, 0.15168];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:5042970
+Total Transitions:5663227
+MDP Iterations:2693184
+Time Used:60.766583s
+Estimated Memory Used:3354556.16KB
+
+=======================================================
+Assertion: PlayMatch() reaches Draw with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches Draw with prob) is Valid with Probability [0.91208, 1];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:1844072
+Total Transitions:2063237
+MDP Iterations:2628198
+Time Used:22.7909764s
+Estimated Memory Used:1260841.984KB
+
+*******************************************************
+*C:\Users\YWL-HP\Desktop\ModelSoccer\full_soccer.pcsp
+**************************START************************
+=======================================================
+Assertion: PlayMatch() reaches FirstTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches FirstTeamWin with prob) is Valid with Probability [0, 0.11047];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4541801
+Total Transitions:5095444
+MDP Iterations:2366443
+Time Used:53.1397919s
+Estimated Memory Used:2761982.464KB
+
+=======================================================
+Assertion: PlayMatch() reaches SecondTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches SecondTeamWin with prob) is Valid with Probability [0, 0.16207];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4795090
+Total Transitions:5383787
+MDP Iterations:2635762
+Time Used:56.0549638s
+Estimated Memory Used:2930799.104KB
+
+=======================================================
+Assertion: PlayMatch() reaches Draw with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches Draw with prob) is Valid with Probability [0.90467, 1];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:1902165
+Total Transitions:2125630
+MDP Iterations:3128611
+Time Used:25.6642225s
+Estimated Memory Used:1390294.784KB
+
+*******************************************************
+*C:\Users\YWL-HP\Desktop\ModelSoccer\full_soccer.pcsp
+**************************START************************
+=======================================================
+Assertion: PlayMatch() reaches FirstTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches FirstTeamWin with prob) is Valid with Probability [0, 0.15237];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4036150
+Total Transitions:4534064
+MDP Iterations:2224380
+Time Used:49.4484648s
+Estimated Memory Used:2478704.896KB
+
+=======================================================
+Assertion: PlayMatch() reaches SecondTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches SecondTeamWin with prob) is Valid with Probability [0, 0.0949];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4752483
+Total Transitions:5334124
+MDP Iterations:2579343
+Time Used:57.6214917s
+Estimated Memory Used:2896731.648KB
+
+=======================================================
+Assertion: PlayMatch() reaches Draw with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches Draw with prob) is Valid with Probability [0.89824, 1];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:1945258
+Total Transitions:2174502
+MDP Iterations:3099461
+Time Used:23.9704628s
+Estimated Memory Used:1415365.248KB
+
+*******************************************************
+*C:\Users\YWL-HP\Desktop\ModelSoccer\full_soccer.pcsp
+**************************START************************
+=======================================================
+Assertion: PlayMatch() reaches FirstTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches FirstTeamWin with prob) is Valid with Probability [0, 0.1683];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:5140836
+Total Transitions:5774879
+MDP Iterations:2860833
+Time Used:60.7683987s
+Estimated Memory Used:3407438.336KB
+
+=======================================================
+Assertion: PlayMatch() reaches SecondTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches SecondTeamWin with prob) is Valid with Probability [0, 0.12271];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4282292
+Total Transitions:4807847
+MDP Iterations:2393727
+Time Used:49.8238324s
+Estimated Memory Used:2697838.848KB
+
+=======================================================
+Assertion: PlayMatch() reaches Draw with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches Draw with prob) is Valid with Probability [0.90855, 1];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:2055063
+Total Transitions:2295716
+MDP Iterations:3154417
+Time Used:26.4700899s
+Estimated Memory Used:1410251.648KB
+
+*******************************************************
+*C:\Users\YWL-HP\Desktop\ModelSoccer\full_soccer.pcsp
+**************************START************************
+=======================================================
+Assertion: PlayMatch() reaches FirstTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches FirstTeamWin with prob) is Valid with Probability [0, 0.07244];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4069871
+Total Transitions:4568246
+MDP Iterations:2205820
+Time Used:47.3917788s
+Estimated Memory Used:2493023.232KB
+
+=======================================================
+Assertion: PlayMatch() reaches SecondTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches SecondTeamWin with prob) is Valid with Probability [0, 0.17183];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4113766
+Total Transitions:4623422
+MDP Iterations:2297932
+Time Used:47.033848s
+Estimated Memory Used:2534262.784KB
+
+=======================================================
+Assertion: PlayMatch() reaches Draw with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches Draw with prob) is Valid with Probability [0.92279, 1];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:2039983
+Total Transitions:2280530
+MDP Iterations:3223906
+Time Used:26.7243005s
+Estimated Memory Used:1405620.224KB
+
+*******************************************************
+*C:\Users\YWL-HP\Desktop\ModelSoccer\full_soccer.pcsp
+**************************START************************
+=======================================================
+Assertion: PlayMatch() reaches FirstTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches FirstTeamWin with prob) is Valid with Probability [0, 0.10009];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:4385809
+Total Transitions:4924261
+MDP Iterations:2398251
+Time Used:51.3195767s
+Estimated Memory Used:2678414.08KB
+
+=======================================================
+Assertion: PlayMatch() reaches SecondTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches SecondTeamWin with prob) is Valid with Probability [0, 0.10953];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:5228902
+Total Transitions:5867577
+MDP Iterations:2944922
+Time Used:60.9099713s
+Estimated Memory Used:3534221.568KB
+
+=======================================================
+Assertion: PlayMatch() reaches Draw with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches Draw with prob) is Valid with Probability [0.9293, 1];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:1939394
+Total Transitions:2169291
+MDP Iterations:3047559
+Time Used:24.5405108s
+Estimated Memory Used:1309804.032KB
+
+*******************************************************
+*C:\Users\YWL-HP\Desktop\ModelSoccer\full_soccer.pcsp
+**************************START************************
+=======================================================
+Assertion: PlayMatch() reaches FirstTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches FirstTeamWin with prob) is Valid with Probability [0, 0.12683];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:5060108
+Total Transitions:5684256
+MDP Iterations:2757810
+Time Used:67.103157s
+Estimated Memory Used:3354288.896KB
+
+=======================================================
+Assertion: PlayMatch() reaches SecondTeamWin with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches SecondTeamWin with prob) is Valid with Probability [0, 0.08919];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:5118239
+Total Transitions:5744008
+MDP Iterations:2765515
+Time Used:69.7006137s
+Estimated Memory Used:3428557.568KB
+
+=======================================================
+Assertion: PlayMatch() reaches Draw with prob
+********Verification Result********
+The Assertion (PlayMatch() reaches Draw with prob) is Valid with Probability [0.87914, 1];
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Graph-based Probability Computation Based on Value Iteration
+System Abstraction: False
+Maximum difference threshold : 1E-06
+
+********Verification Statistics********
+Visited States:1939961
+Total Transitions:2169291
+MDP Iterations:3409273
+Time Used:23.7757034s
+Estimated Memory Used:1356718.592KB
+
