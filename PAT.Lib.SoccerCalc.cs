@@ -211,6 +211,74 @@ namespace PAT.Lib
             }
         };
 
+        private static int[,,] DEFENSIVE_STATS = new int[NUMBER_OF_TEAMS, NUMBER_OF_PLAYERS_PER_TEAM, NUMBER_OF_OFFENSIVE_STATS] {
+            { // Team 0 - Manchester City
+                { // Player 0 - Sterling
+                    50
+                },
+                { // Player 1 - Jesus
+                    50
+                },
+                { // Player 2 - Mahrez
+                    50
+                },
+                { // Player 3 - Gündogan
+                    63
+                },
+                { // Player 4 - Rodrigo
+                    60
+                },
+                { // Player 5 - Silva
+                    63
+                },
+                { // Player 6 - Cancelo
+                    58
+                },
+                { // Player 7 - Dias
+                    62
+                },
+                { // Player 8 - Stones
+                    73
+                },
+                { // Player 9 - Walker
+                    76
+                }
+            },
+            { // Team 1 - Manchester United
+                { // Player 0 - Rashford
+                    50
+                },
+                { // Player 1 - Fernandes
+                    50
+                },
+                { // Player 2 - Greenwood
+                    50
+                },
+                { // Player 3 - Pogba
+                    68
+                },
+                { // Player 4 - Fred
+                    52
+                },
+                { // Player 5 - McTominay
+                    57
+                },
+                { // Player 6 - Shaw
+                    72
+                },
+                { // Player 7 - Maguire
+                    67
+                },
+                { // Player 8 - Lindelöf
+                    59
+                },
+                { // Player 9 - W-Bissaka
+                    64
+                }
+            }
+        };
+
+
         public static int[,,] PLAYER_PROBABILITIES = new int[NUMBER_OF_TEAMS, NUMBER_OF_PLAYERS_PER_TEAM, NUMBER_OF_PROBABILITIES] {
             { // Team 0
                 { // Player 0
