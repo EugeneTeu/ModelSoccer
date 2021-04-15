@@ -75,6 +75,7 @@ namespace PAT.Lib
             2, 6  // Player 9 - right wing defender
         };
 
+		// 4-2-2
         private static int[] FORMATION_4_4_2 = new int[TOTAL_NUMBER_OF_PLAYERS * NUMBER_OF_DIMENSIONS] {
             // Team 0
             3, 4, // Player 0 - centre striker
@@ -412,13 +413,13 @@ namespace PAT.Lib
                 if (team == 0) 
                 {
                     // Team 0 attacks to the right
-                    playerPositions[playerColIdx] = Math.Clamp(playerPositions[playerColIdx] + 1, MIN_COL, MAX_COL);
+                    playerPositions[playerColIdx] = Math.Min(playerPositions[playerColIdx] + 1, MAX_COL);
                 }
 
                 if (team == 1) 
                 {
                     // Team 1 attacks to the left
-                    playerPositions[playerColIdx] = Math.Clamp(playerPositions[playerColIdx] - 1, MIN_COL, MAX_COL);
+                    playerPositions[playerColIdx] = Math.Max(playerPositions[playerColIdx] - 1, MIN_COL);
                 }
 
                 // 33% to move diagonally
@@ -433,11 +434,11 @@ namespace PAT.Lib
                 // Handle vertical movement
                 if (playerPositions[playerRowIdx] < 3)
                 {
-                    playerPositions[playerRowIdx] = Math.Clamp(playerPositions[playerRowIdx] - 1, MIN_ROW, MAX_ROW);
+                    playerPositions[playerRowIdx] = Math.Max(playerPositions[playerRowIdx] - 1, MIN_ROW);
                 }
                 else
                 {
-                    playerPositions[playerRowIdx] = Math.Clamp(playerPositions[playerRowIdx] + 1, MIN_ROW, MAX_ROW);
+                    playerPositions[playerRowIdx] = Math.Min(playerPositions[playerRowIdx] + 1, MAX_ROW);
                 }
             }
         }
@@ -451,13 +452,13 @@ namespace PAT.Lib
                 if (team == 0)
                 {
                     // Team 0 defends to the left
-                    playerPositions[playerColIdx] = Math.Clamp(playerPositions[playerColIdx] - 1, MIN_COL, MAX_COL);
+                    playerPositions[playerColIdx] = Math.Max(playerPositions[playerColIdx] - 1, MIN_COL);
                 }
 
                 if (team == 1)
                 {
                     // Team 1 defends to the right
-                    playerPositions[playerColIdx] = Math.Clamp(playerPositions[playerColIdx] + 1, MIN_COL, MAX_COL);
+                    playerPositions[playerColIdx] = Math.Min(playerPositions[playerColIdx] + 1, MAX_COL);
                 }
 
                 // 33% to move diagonally
@@ -472,11 +473,11 @@ namespace PAT.Lib
                 // Handle vertical movement
                 if (playerPositions[playerRowIdx] < 3)
                 {
-                    playerPositions[playerRowIdx] = Math.Clamp(playerPositions[playerRowIdx] - 1, MIN_ROW, MAX_ROW);
+                    playerPositions[playerRowIdx] = Math.Max(playerPositions[playerRowIdx] - 1, MIN_ROW);
                 }
                 else
                 {
-                    playerPositions[playerRowIdx] = Math.Clamp(playerPositions[playerRowIdx] + 1, MIN_ROW, MAX_ROW);
+                    playerPositions[playerRowIdx] = Math.Min(playerPositions[playerRowIdx] + 1, MAX_ROW);
                 }
             }
         }
@@ -542,9 +543,9 @@ namespace PAT.Lib
             }
 
             if (possession == 0) {
-                playerPositions[playerColIdx] = Math.Clamp(playerCol + 1, MIN_COL, MAX_COL);
+                playerPositions[playerColIdx] = Math.Min(playerCol + 1, MAX_COL);
             } else {
-                playerPositions[playerColIdx] = Math.Clamp(playerCol - 1, MIN_COL, MAX_COL);
+                playerPositions[playerColIdx] = Math.Max(playerCol - 1, MIN_COL);
             }
 
             return playerPositions;

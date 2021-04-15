@@ -45,7 +45,7 @@
 
 hvar formation = 433;
 hvar frozen = false;
-var time = 5;
+var time = 6;
 var scores[NUMBER_OF_TEAMS] = [0, 0];
 var possession = -1;
 var ballPlayer = -1;
