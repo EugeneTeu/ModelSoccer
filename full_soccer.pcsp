@@ -52,6 +52,7 @@ var ballPlayer = -1;
 var ballPosition[NUMBER_OF_DIMENSIONS] = [3, 4]; // Ball always starts in the centre
 hvar offenseProbabilities[NUMBER_OF_OFFENSIVE_ACTIONS] = [1, 1, 1]; // [Shoot, Pass, Dribble]
 hvar retrieveResult = [0, 0]; // arbitrary
+hvar tackleResult = [0, 0];
 var playerPositions[NUMBER_OF_TEAMS][PLAYERS_PER_TEAM][NUMBER_OF_DIMENSIONS] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
 //////////////////////
@@ -111,10 +112,7 @@ OtherAction() = |||team:{0, 1} @ OtherAct.team -> (
 	[frozen] Skip
 );
 
-DefensiveAction() = pcase {
-	call(getTackleProb, playerPositions, ballPosition, possession): TackleSuccess { ballPlayer = call(getTacklePlayer, playerPositions, ballPosition, possession); possession = (possession + 1) % 2; } -> Skip
-	call(getDodgeProb, possession, ballPlayer): TackleFail -> Skip
-};
+DefensiveAction() = Tackle { tackleResult = call(tackle, playerPositions, ballPosition, possession, ballPlayer); possession = tackleResult[0]; ballPlayer = tackleResult[1]; } -> Skip;
 
 OffensiveAction() = UpdateOffenseProbabilities { offenseProbabilities = call(getOffenseProbabilities, possession, ballPosition, playerPositions) } -> pcase {
 	offenseProbabilities[0]: Shoot -> _Shoot()
@@ -124,7 +122,7 @@ OffensiveAction() = UpdateOffenseProbabilities { offenseProbabilities = call(get
 
 _Dribble() = pcase {
 	9: DribbleSuccess { playerPositions = call(dribble, playerPositions, possession, ballPlayer); ballPosition[0] = playerPositions[possession][ballPlayer][0]; ballPosition[1] = playerPositions[possession][ballPlayer][1]; } -> Skip
-	1: DribbleFail { possession = -1; } -> Skip
+	1: DribbleFail { possession = -1; ballPlayer = -1; } -> Skip
 };
 
 _Shoot() = pcase {
@@ -133,11 +131,7 @@ _Shoot() = pcase {
 	call(getMissProb, possession, ballPlayer): Miss { ballPosition = call(setPassTarget, possession, ballPosition); possession = -1; ballPlayer = -1; } -> Skip
 };
 
-_Pass() = pcase { 
-	// It is hard to measure the probability of successful passing by individual players, but there are plenty of statistics showing around 80% passing rate for the entire team. See: https://www.whoscored.com/Statistics
-    4: PassSuccess { ballPosition = call(setPassTarget, possession, ballPosition); possession = -1; ballPlayer = -1;  } -> Skip
-    1: PassOutOfBounds { ballPosition = call(setOutOfBoundThenThrowIn, ballPosition); possession = (possession + 1) % 2; ballPlayer = 4; playerPositions[possession][4][0] = ballPosition[0]; playerPositions[possession][4][1] = ballPosition[1]; } -> Skip
-};
+_Pass() = Pass { ballPosition = call(setPassTarget, possession, ballPosition); possession = -1; ballPlayer = -1; } -> Skip;
 
 PlayMatch() = DecideFirstPossession(); SetKickOffPosition(possession); TakeAction();
 
