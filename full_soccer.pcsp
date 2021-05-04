@@ -43,9 +43,9 @@
 #define MIN_COL 1;
 #define MAX_COL 7;
 
-hvar formation = 433;
+hvar formation = 442;
 hvar frozen = false;
-var time = 7;
+var time = 30;
 var scores[NUMBER_OF_TEAMS] = [0, 0];
 var possession = -1;
 var ballPlayer = -1;
@@ -53,7 +53,7 @@ var ballPosition[NUMBER_OF_DIMENSIONS] = [3, 4]; // Ball always starts in the ce
 hvar offenseProbabilities[NUMBER_OF_OFFENSIVE_ACTIONS] = [1, 1, 1]; // [Shoot, Pass, Dribble]
 hvar retrieveResult = [0, 0]; // arbitrary
 hvar tackleResult = [0, 0];
-var playerPositions[NUMBER_OF_TEAMS][PLAYERS_PER_TEAM][NUMBER_OF_DIMENSIONS] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+hvar playerPositions[NUMBER_OF_TEAMS][PLAYERS_PER_TEAM][NUMBER_OF_DIMENSIONS] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
 //////////////////////
 // Position setting //
@@ -114,12 +114,14 @@ OtherAction() = |||team:{0, 1} @ OtherAct.team -> (
 
 DefensiveAction() = Tackle { tackleResult = call(tackle, playerPositions, ballPosition, possession, ballPlayer); possession = tackleResult[0]; ballPlayer = tackleResult[1]; } -> Skip;
 
-OffensiveAction() = UpdateOffenseProbabilities { offenseProbabilities = call(getOffenseProbabilities, possession, ballPosition, playerPositions) } -> pcase {
+OffensiveAction() = UpdateOffenseProbabilities { 
+		offenseProbabilities = call(getOffenseProbabilities, possession, ballPosition, playerPositions) 
+	} -> pcase {
 	offenseProbabilities[0]: Shoot -> _Shoot()
 	offenseProbabilities[1]: Pass -> _Pass()
 	offenseProbabilities[2]: Dribble -> _Dribble()
 };
-
+//
 _Dribble() = pcase {
 	9: DribbleSuccess { playerPositions = call(dribble, playerPositions, possession, ballPlayer); ballPosition[0] = playerPositions[possession][ballPlayer][0]; ballPosition[1] = playerPositions[possession][ballPlayer][1]; } -> Skip
 	1: DribbleFail { possession = -1; ballPlayer = -1; } -> Skip
@@ -139,12 +141,12 @@ PlayMatch() = DecideFirstPossession(); SetKickOffPosition(possession); TakeActio
 #define SecondTeamWin scores[1] > scores[0] && time <= 0;
 #define Draw scores[0] == scores[1] && time <= 0;
 
-//#assert PlayMatch() reaches FirstTeamWin;
-//#assert PlayMatch() reaches SecondTeamWin;
-//#assert PlayMatch() reaches Draw;
+#assert PlayMatch() reaches FirstTeamWin;
+#assert PlayMatch() reaches SecondTeamWin;
+#assert PlayMatch() reaches Draw;
 
 #assert PlayMatch() reaches FirstTeamWin with prob;
 #assert PlayMatch() reaches SecondTeamWin with prob;
 #assert PlayMatch() reaches Draw with prob;
 
-//#assert PlayMatch() deadlockfree;
+#assert PlayMatch() deadlockfree;

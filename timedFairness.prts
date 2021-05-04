@@ -1,0 +1,28 @@
+﻿P = (a -> P) ;
+Q = e -> a -> Q;
+D = b -> D;
+C = P|||Q ||| D;
+#assert C |= <> a; // eventually - some state
+#assert C |= []<> a; // always eventually - every state
+#assert C |= <>[] a; // converge to a 
+#assert P |= <>[] a; // true
+#assert P |= []<> a;
+
+
+#assert C |= [] a;
+#assert P |= [] a;
+
+// always eventually - for all path , i engage this before...
+// eventually - for only one path
+
+P1 = a -> Wait[2];b->P1;
+Q2 = P1 deadline[3];
+#assert Q2 deadlockfree;
+#assert Q2 |= []<>a;
+
+B() = a -> b -> B interrupt[1] c -> Skip;
+
+//always - From any path and any subpath should be able to reach that condition for |= []<>a 
+P3 = a -> b -> P3;
+#assert P3 |= <> a;
+#assert P3 |= []<>a;

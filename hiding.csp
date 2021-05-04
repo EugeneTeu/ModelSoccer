@@ -1,0 +1,18 @@
+﻿Ticker() = tick1 -> Ticker();
+Tocker() = tick2 -> tock -> Tocker();
+
+P() = Ticker() || Tocker();
+Q() = Ticker() \ {tick} || Tocker();
+Q2() = Ticker() ||| Tocker();
+
+HTicker() = Ticker();
+#alphabet HTicker {dummy};
+
+R() = HTicker() || Tocker();
+
+TTicker() = Ticker();
+#alphabet TTicker {tock};
+
+S() = TTicker() || Tocker();
+
+T() = Ticker() || Tocker() \ {tock};

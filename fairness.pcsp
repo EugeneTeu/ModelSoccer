@@ -1,0 +1,11 @@
+﻿w = a -> (b -> w [] c -> w [] d -> w);
+
+#assert w |= []<>b;
+
+
+w1 = a -> w2;
+w2 = b -> w3 [] a -> w3;
+w3 = b -> w2 [] c -> w2;
+
+#assert w1 |= []<>b;
+#assert w1 |= []<>c;

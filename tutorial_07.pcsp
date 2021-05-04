@@ -1,0 +1,81 @@
+﻿var condition = 0;
+var success = false;
+
+// when condition < 0, P and only P must happen
+// when condition > 0, Q and only Q must happen
+// when condition = 0, either P or Q must happen
+
+P = pcase{
+	[0.3]: p_f -> R
+    [0.7]: p_s {success=true;} -> R
+    };
+    
+Q = pcase{
+    [0.6]: q_s {success=true;} -> R
+    [0.4]: q_f -> R
+    };
+    
+R = end -> R;
+
+A = [condition<=0] P  []
+	[condition>=0]  Q;
+	
+// when condition = 0, both P and Q will happen?, they can happen in any order
+B = [condition<=0] P  ||| 
+	[condition>=0]  Q;
+	
+// 50% of times P happen, 50% of times Q happen
+C = pcase{
+	1: P
+	1: Q
+	};
+	
+//C = [condition<0] P  []
+//	[condition>0] Q  []
+//	[condition==0] pcase{
+//	1: P
+//	1: Q
+//	};
+	
+//C = pcase{
+//	1: set_c_1 {condition = -1;} -> A
+//	1: set_c0 {condition = 0;} -> A
+//	1: set_c1 {condition = 1;} -> A
+//	};
+	
+#assert A deadlockfree;
+#assert B deadlockfree;
+#assert C deadlockfree;
+#define goal success==true;
+#assert A reaches goal with prob;
+#assert B reaches goal with prob;
+#assert C reaches goal with prob;
+#assert A reaches goal;
+
+P2 = pcase{
+    [0.7]: atomic{ p_s {success=true;} -> Skip}
+    [0.3]: atomic{ p_f -> Skip}
+    }; R;
+    
+Q2 = pcase{
+    [0.6]: atomic{ q_s {success=true;} -> Skip}
+    [0.4]: atomic{ q_f -> Skip}
+    }; R;
+    
+    
+B2 = [condition<=0] P2  ||| 
+	[condition>=0]  Q2;
+#assert B2 deadlockfree;
+#assert B2 reaches goal with prob;
+
+
+P3 = pcase{
+    [0.6]: p_s {success=true;} -> R
+    [0.4]: p_f -> P4
+    };
+P4 = pcase{
+	1: end -> R
+	1: back {success=false} -> P3
+	};
+#assert P3 deadlockfree;
+#assert P3 reaches goal with prob;

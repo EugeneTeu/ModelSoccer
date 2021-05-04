@@ -1,0 +1,21 @@
+﻿// data race problem
+var ticket = 1;
+var cache = 0;
+
+P() = a -> atomic {
+	e.11{cache=ticket;} -> 
+	e.12{if(cache>0){ticket=ticket-1;}} -> 
+	Skip
+	}
+	;
+
+Q() = b -> atomic {
+	e.21{cache=ticket;} -> 
+	e.22{if(cache>0){ticket=ticket-1;}} -> 
+	Skip
+	}
+	;
+
+A() = P || Q;
+#define goal ticket<0;
+#assert A reaches goal;

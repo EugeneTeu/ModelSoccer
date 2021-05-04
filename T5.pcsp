@@ -1,0 +1,14 @@
+﻿var board[3][3] = [0,0,0,0,0,-1,0,0,-1];
+
+var r:{0..2} = 0;
+var c:{0..2} = 0;
+hvar time = 2;
+
+
+P = [r-1>=0 && time > 0] MoveUp { r = r - 1; time--;} -> P
+	[] [r+1 < 3 && time > 0] MoveDown { r = r + 1; time--;} -> P
+	[] [c-1>=0 && time >0] MoveLeft { c=c-1;time--;} -> P
+	[] [c+1 < 3 && time >0]MoveRight {c=c+1; time--;} -> P
+	[] [time <= 0] Skip;
+	
+#assert P deadlockfree;

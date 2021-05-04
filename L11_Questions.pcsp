@@ -1,0 +1,6 @@
+﻿P = a -> Wait[1]; b -> Wait[2]; c -> P;
+Q = a -> Wait[2]; b -> Wait[1]; c -> Q;
+
+Sys = (P || Q ) deadline[4];
+
+#assert Sys |= <>c;

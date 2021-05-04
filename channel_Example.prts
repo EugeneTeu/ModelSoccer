@@ -1,0 +1,15 @@
+﻿#define n 1;
+
+channel cn 0;
+channel cu 0;
+
+P(i) = cn!i -> a -> b -> P(i) [] cu!i -> c -> d -> Q(i);
+Q(i) = cu?i -> e -> cn?i -> F -> Skip; 
+
+
+System = (|||x:{0..n}@P(x)) ||| (||| y:{0..n}@Q(y));
+
+#assert System |= <> e;
+#assert System deadlockfree;
+
+

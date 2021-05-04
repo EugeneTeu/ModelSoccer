@@ -1,0 +1,37 @@
+﻿// data race and lock
+
+var ticket = 1;
+var cache = 0;
+//P() = a -> e.11 {cache = ticket;} -> e.12 { if (cache>0) {ticket = ticket -1;}} -> Skip;
+//Q() = b -> e.21 {cache = ticket;} -> e.22 { if (cache>0) {ticket = ticket -1;}} -> Skip ;
+
+//trace with race: e.21 -> e.11 -> e.22 -> e.12 (interleaved) 
+
+// solution 1 to fix the data race (atomic keyword)
+// need to have additional events here because we want to force the atomic sequential execution
+// the events in the atomic keyword will not interleave with each other
+//P() = a -> atomic { e.11 {cache = ticket;} -> e.12 { if (cache>0) {ticket = ticket -1;}} -> Skip };
+//Q() = b -> atomic { e.21 {cache = ticket;} -> e.22 { if (cache>0) {ticket = ticket -1;}} -> Skip };
+
+//A() = P ||| Q;
+
+// solution 2 to fix data race (parallel composition) use a synchronisation barrier. add the b to the end of P. This means that P will execute until reach b, then Q execute.
+//P() = a -> e.11 {cache = ticket;} -> e.12 { if (cache>0) {ticket = ticket -1;}} -> b -> Skip;
+//Q() = b -> e.21 {cache = ticket;} -> e.22 { if (cache>0) {ticket = ticket -1;}} -> Skip ;
+//A() = P || Q;
+
+//// solution 3: ifa keyword
+//P() = e.11 {cache = ticket;} -> e.12 { if (cache>0) {ticket = ticket -1;}} -> Skip;
+//Q() = e.21 {cache = ticket;} -> e.22 { if (cache>0) {ticket = ticket -1;}} -> Skip ;
+//A() = ifa(cache == 0) {P} ||| ifa(cache ==0) {Q} ;
+
+// solution 4: ifa keyword with mutex lock
+
+var lock = 1;
+
+P() = e.10 { lock--;} -> e.11 {cache = ticket;} -> e.12 { if (cache>0) {ticket = ticket -1;}} -> e.13 { lock++;} -> Skip;
+Q() = e.20 { lock--;} -> e.21 {cache = ticket;} -> e.22 { if (cache>0) {ticket = ticket -1;}} -> e.23 {lock++;} -> Skip ;
+A() = ifa(lock > 0) {P} ||| ifa(lock > 0) {Q} ;
+
+#define goal ticket<0;
+#assert A reaches goal;

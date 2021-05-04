@@ -1,0 +1,14 @@
+﻿//deadlock
+
+DT() = a -> b -> DT [] c -> d -> DT;
+VP() = e -> b -> VP [] f -> d -> VP;
+
+play1 =  DT || VP;
+// this solves the deadlock by synchronising the order of choice with the parallel composition
+// control the interleaving
+play2 = a -> e -> play2 [] c -> f -> play2;
+
+play3 = DT || VP || play2;
+
+#assert play1 deadlockfree;
+#assert play3 deadlockfree;

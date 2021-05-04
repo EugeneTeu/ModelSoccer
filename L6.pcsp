@@ -1,0 +1,8 @@
+﻿
+//#alphabet P { b  }  ;
+P =  b -> a -> Q [] n -> d -> P;
+Q = b -> dd -> P [] m -> Q;
+
+sys = P ||| Q ;
+
+#assert sys deadlockfree;

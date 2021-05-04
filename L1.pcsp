@@ -1,0 +1,31 @@
+﻿//VMH = on -> coin -> choc -> off -> VMH;
+//CUST = on -> (coin -> bisc -> CUST [] curse -> coin -> choc -> CUST);
+//
+//sys2 = VMH || CUST;
+//
+//#assert sys2 deadlockfree;
+
+//A = coin -> (choc -> A [] bisc -> A);
+//B = choc -> B [] coin -> choc -> B;
+//
+//Sys1 = A || B;
+
+
+//#assert Sys1 deadlockfree;
+
+#alphabet GREEDY {coin, choc, bisc};
+VMC = coin -> (choc -> VMC [] bisc -> VMC);
+GREEDY = choc -> GREEDY [] bisc -> GREEDY;
+
+System4 = VMC || GREEDY;
+
+#assert System4 deadlockfree;
+
+#alphabet VM { coin, choc, bisc};
+#alphabet BISCLOV {coin, choc, bisc};
+
+VM = coin -> choc -> VM;
+BISCLOV = coin -> bisc -> BISCLOV;
+
+System5 = VM || BISCLOV;
+#assert System5 deadlockfree;

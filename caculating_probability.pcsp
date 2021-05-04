@@ -1,0 +1,109 @@
+﻿var success = false;
+
+P = pcase {
+	[0.2]: (b -> P) [] (c -> P [] d -> Q)  // pcase { [0.25]: Q [0.75]: P }
+	[0.5]: e2 {success = true;} -> Q
+	[0.3]: q_f -> Q
+};
+
+Q = end -> Q;
+
+P2 = pcase {
+	[0.2]: k_s -> Q //(b -> P) [] pcase { [0.25]: Q [0.75]: P }
+	[0.5]: e2 {success = true;} -> Q
+	[0.3]: q_f -> Q
+};
+
+
+P3 = pcase {
+	[0.2]: q_s -> Q
+	[0.5]: e3 {success = true;} -> Q
+	[0.3]: q_f -> Q
+};  
+
+P4 = P2||P3;
+
+#define goal success == true;
+#assert P reaches goal with prob;
+#assert P2 reaches goal with prob;
+#assert P3 reaches goal with prob;
+#assert P4 reaches goal with prob;
+
+W = a -> b -> W [] c -> d -> W;
+G = f -> b -> G [] e -> d -> G;
+
+play = W || G;
+
+#assert play deadlockfree;
+
+F = a -> f -> F [] c -> e -> F;
+// solves deadlock by forcing execution of a->f or c -> e
+play2 = W || G || F;
+
+#assert play2 deadlockfree;
+
+// < a,f,b> 
+// <a,h> possible, but will deadlock
+// < a, h, d> not possible 
+// <c,h, >
+
+
+A1 = pcase {
+	[0.5]: atomic { e_s{ success = true;} -> Q }
+	[0.3]: atomic { d -> Q } 
+	[0.2]: atomic { f -> A1}
+};
+
+A2 = pcase {
+	[0.3]: atomic { e_2{ success = true;} -> Q }
+	[0.5]: atomic { c -> Q } 
+	[0.2]: atomic { g -> A1}
+};
+A1nA2 = A1 || A2;
+#assert A1 reaches goal with prob;
+#assert A1nA2 reaches goal with prob;
+
+// lecture question 
+
+EX_1 = pcase {
+	[0.7]: atomic { p_s { success = true;} -> Skip} // atomic forces the execution it after the pcase 
+	[0.3]: atomic { p_f -> Skip }
+	}; R;
+	
+EX_2 = pcase {
+	[0.6]: atomic { q_s { success = true;} -> Skip}
+	[0.4]: atomic { q_f -> Skip }
+	}; R;
+
+R = end -> R;
+B2 = EX_1 || EX_2; // since probability is a distribution, we have to add the pcases together
+B3 = EX_1 ||| EX_2; // why interleaving then we can "short circuit" and take the min as 0.6 ? 
+#assert B2 reaches goal with prob;
+#assert B3 reaches goal with prob;
+
+
+// pcase means we need to evaluate all branches 
+// not just one branch 
+
+
+P5 = pcase {
+	[0.7]: p_s {success=true;} -> R5
+	[0.3]: p_f -> R5
+}; 
+Q5 = pcase {
+		[0.6]: q_s {success = true;}->R5
+		[0.4]: q_f -> R5};
+R5 = end -> R5;
+
+B5 = P5 ||| Q5;
+#assert B5 reaches goal with prob;
+
+
+// choices 
+
+// [] <>
+
+// if all events are visible, general choice and external choice are equivalent
+
+// a->P [] b -> Q , if we do one side, the other side we dont care 
+// a -> P <> b -> Q , tau event, bring to either side 

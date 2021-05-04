@@ -1,0 +1,96 @@
+﻿channel ubufch 0;
+channel bufch 2;
+
+P() = ubufch!1 -> Skip;
+Q() = a -> ubufch?m -> print.m -> Skip;
+
+#alphabet Q {print};
+
+Start() = P() ||| Q();
+
+// Qn: Which events can occur first in Start()?
+// a
+
+P2() = b -> ubufch!1 -> Skip;
+Q2() = ubufch?m -> print.m -> Skip;
+
+#alphabet Q2 {print};
+
+Start2() = P2() ||| Q2();
+
+// Qn: Which events can occur first in Start2()?
+// b
+P3() = b -> ubufch!1 -> Skip;
+Q3() = a -> ubufch?m -> print.m -> Skip;
+
+#alphabet Q3 {print};
+
+Start3() = P3() ||| Q3();
+
+// Qn: Which events can occur first in Start3()?
+// a or b
+P4() = ubufch?m -> Skip;
+Q4() = ubufch?m -> print.m -> Skip;
+
+#alphabet Q4 {print};
+
+Start4() = P4() ||| Q4();
+
+#assert Start4() deadlockfree;
+// Qn: Does Start4 have a deadlock?
+// deadlock
+P5() = ubufch!1 -> Skip;
+Q5() = ubufch!1 -> print.1 -> Skip;
+
+#alphabet Q5 {print};
+
+Start5() = P5() ||| Q5();
+
+#assert Start5() deadlockfree;
+// Qn: Does Start5 have a deadlock?
+// sync, needs ? event to occur
+P6() = bufch!1 -> Skip;
+Q6() = bufch!1 -> print.1 -> Skip;
+
+#alphabet Q6 {print};
+
+Start6() = P6() ||| Q6();
+
+#assert Start6() deadlockfree;
+// Qn: Does Start6 have a deadlock?
+// async so ok
+P7() = bufch!1 -> Skip;
+Q7() = bufch!1 -> print.1 -> Skip;
+R7() = a -> P7();
+
+#alphabet Q7 {print};
+
+Start7() = P7() ||| Q7() ||| R7();
+
+#assert Start7() deadlockfree;
+// Qn: Does Start7 have a deadlock?
+// 3 items but pipe only got 2
+P8() = bufch!1 -> Skip;
+Q8() = bufch!1 -> print.1 -> Skip;
+R8() = bufch?m -> print.m -> Skip;
+
+#alphabet Q8 {print.1};
+#alphabet R8 {print.1};
+
+Start8() = P8() || Q8() || R8();
+
+#assert Start8() deadlockfree;
+// Qn: Does Start8 have a deadlock?
+// deadlock after first loop
+P9() = bufch!1 -> P9();
+Q9() = bufch!1 -> print.1 -> Skip;
+R9() = bufch?m -> print.m -> R9();
+
+#alphabet Q9 {print};
+#alphabet R9 {print};
+
+Start9() = P9() ||| Q9() ||| R9();
+
+#assert Start9() deadlockfree;
+// Qn: Does Start9 have a deadlock?
+// no
